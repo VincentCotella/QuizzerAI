@@ -1,4 +1,5 @@
 // lib/screens/join_game_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -15,8 +16,8 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
   String _gameCode = '';
   bool _isLoading = false;
 
-  // Remplacez par l'URL de votre backend
-  final String _joinGameBaseUrl = 'https://192.168.1.170:8543/game/join';
+  // URL pour rejoindre une partie existante
+  final String _joinGameUrl = 'https://192.168.1.170:8543/game/join';
 
   Future<void> _joinGame() async {
     if (_formKey.currentState!.validate()) {
@@ -24,31 +25,29 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
         _isLoading = true;
       });
 
-      // Construire l'URL avec les paramètres de requête
-      Uri url = Uri.parse(_joinGameBaseUrl).replace(queryParameters: {
-        'code': _gameCode,
-      });
-
       try {
+        // Envoyer une requête POST à /game/join pour rejoindre une partie
         final response = await http.post(
-          url,
+          Uri.parse("${_joinGameUrl}?code=${_gameCode}"),
           headers: {'Content-Type': 'application/json'},
+          body: json.encode({'code': _gameCode}),
         );
 
         if (response.statusCode == 200) {
-          // Supposons que le backend renvoie un code PIN valide
-          final data = json.decode(response.body);
-          String gameCode = data['code'].toString();
-
-          // Naviguer vers le salon de jeu avec le gameCode
+          // Naviguer vers le salon de jeu
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-                builder: (context) => GameLoungeScreen(gameCode: gameCode)),
-            (Route<dynamic> route) => route.isFirst,
+            MaterialPageRoute(builder: (context) => GameLoungeScreen()),
+            (Route<dynamic> route) => false,
+          );
+        } else if (response.statusCode == 400) {
+          final data = json.decode(response.body);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text(data['message'] ?? 'Erreur lors de la jonction de la partie.')),
           );
         } else {
-          // Afficher une erreur
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
                 content: Text(
@@ -56,7 +55,7 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
           );
         }
       } catch (e) {
-        // Gestion des erreurs de connexion
+        print('Exception attrapée : $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur de connexion. Veuillez réessayer.')),
         );
@@ -97,8 +96,8 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: 'Code PIN',
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 8.0),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
