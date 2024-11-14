@@ -3,8 +3,7 @@
 ##jfgt
 ## génère les questions, prend en entré soit thème soit documents
 # prompt, appel à gemini et génère 10 questions à mettre dans un JSON
-## préciser la langue dans le prompte
-
+## préciser la langue dans le prompt
 
 import vertexai
 from vertexai.generative_models import GenerativeModel
@@ -32,7 +31,9 @@ def generate_qcm():
         return jsonify({"error": "Theme is required"}), 400
     
     # Générer le contenu avec le modèle Vertex AI
-    prompt = f"Generate 10 multiple-choice questions (QCM) on the theme: {theme}."
+    prompt = f"Si tu as en entrée un thème et un niveau (en français), explore le thème en fonction du niveau et génère 10 questions type QCM 
+     qui ont toutes 4 options de réponses. Si tu as un document en entrée explore le et combine des connaissances qui correspondet au niveau du document
+     et génère 10 questions type QCM qui ont toutes 4 options de réponses. {theme}."
     response = model.generate_content(prompt)
     
     # Récupérer et structurer la réponse en JSON
