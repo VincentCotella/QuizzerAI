@@ -40,7 +40,7 @@ model = GenerativeModel(model_name="gemini-1.5-flash-002")
 
 import json
 
-def generer_questions(theme: str, niveau_difficulte: str):
+def generer_questions(theme: str, niveau_difficulte: str, nbquestion : int):
     """
     Génère des questions QCM basées sur un thème et un niveau de difficulté.
 
@@ -52,7 +52,7 @@ def generer_questions(theme: str, niveau_difficulte: str):
     - dict: Les questions générées sous forme de JSON structuré.
     """
     # Simplifier le prompt pour réduire la complexité
-    prompt = f"""Génère dix questions de type QCM sur le thème '{theme}' avec un niveau de difficulté '{niveau_difficulte}'.
+    prompt = f"""Génère '{nbquestion}' questions de type QCM sur le thème '{theme}' avec un niveau de difficulté '{niveau_difficulte}'.
     Chaque question doit comporter quatre options de réponses et une seule réponse correcte.
     Renvoie les questions sous forme d'un fichier JSON où chaque élément est structuré comme suit :
     - "question" : la question posée
