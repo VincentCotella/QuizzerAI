@@ -34,7 +34,50 @@ def generer_questions(theme: str, niveau_difficulte: str) -> str:
     
     """
     # Création du prompt en intégrant le thème et le niveau de difficulté
-    prompt = f"Créez dix questions de niveau {niveau_difficulte} sur le thème suivant : {theme}. Les questions doivent être de type qcm avec chacune 4 options de réponses dont une réponse juste."
+    prompt = f"""Créez dix questions de niveau {niveau_difficulte} sur le thème suivant : {theme}. 
+    Les questions doivent être de type QCM avec chacune 4 options de réponses, dont une réponse juste. 
+    Renvoie le résultat sous forme d'un fichier JSON avec la structure suivante :
+
+{{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "type": "array",
+  "items": [
+    {{
+      "type": "object",
+      "properties": {{
+        "question": {{
+          "type": "string"
+        }},
+        "answers": {{
+          "type": "array",
+          "items": [
+            {{
+              "type": "string"
+            }},
+            {{
+              "type": "string"
+            }},
+            {{
+              "type": "string"
+            }},
+            {{
+              "type": "string"
+            }}
+          ]
+        }},
+        "correct": {{
+          "type": "integer"
+        }}
+      }},
+      "required": [
+        "question",
+        "answers",
+        "correct"
+      ]
+    }}
+  ]
+}}"""
+
 
     # Génération du texte
     response = model.generate_content(
