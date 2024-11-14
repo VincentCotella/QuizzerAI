@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from init_questions import generer_questions
+from service import generer_questions
 app = Flask(__name__)
 
 @app.route('/generer', methods=['POST'])
