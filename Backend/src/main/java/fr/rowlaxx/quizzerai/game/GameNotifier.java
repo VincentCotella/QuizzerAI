@@ -52,6 +52,7 @@ public class GameNotifier extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        log.info("Accepting websocket connection");
         try {
             var code = getCode(session);
             sessions.computeIfAbsent(code, k -> new LinkedList<>()).add(session);
@@ -62,6 +63,7 @@ public class GameNotifier extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        log.info("Dispatching websocket connection");
         try {
             var code = getCode(session);
             var list = sessions.get(code);
@@ -74,11 +76,11 @@ public class GameNotifier extends TextWebSocketHandler {
 
     private int getCode(WebSocketSession session) {
         var headers = session.getHandshakeHeaders();
-        var code = headers.get("X-GameCode").stream().findFirst();
 
         try {
+            var code = headers.get("X-GameCode").stream().findFirst();
             return Integer.parseInt(code.orElseThrow());
-        } catch (NoSuchElementException | NumberFormatException e) {
+        } catch (NoSuchElementException | NumberFormatException | NullPointerException e) {
             throw new IllegalStateException("X-GameCode must be present and valid");
         }
     }

@@ -1,20 +1,25 @@
 package fr.rowlaxx.quizzerai.game;
 
 import fr.rowlaxx.quizzerai.player.Player;
+import fr.rowlaxx.quizzerai.question.QuestionGeneratorService;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class GameService {
     private final Random random = new Random();
     private final Map<Integer, Game> games = new HashMap<>();
     private final GameNotifier notifier;
+    private final QuestionGeneratorService questionGenerator;
 
     private int generateCode() {
         if (games.size() >= 1_000_000) {
@@ -37,6 +42,18 @@ public class GameService {
 
         var code = generateCode();
         var game = new Game(code, count, theme, difficulty);
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                log.info("Generating {} questions for the theme {}", count, theme);
+                game.getQuestions().addAll(questionGenerator.generateQuestions(theme, difficulty, count));
+                log.info("Questions generated");
+            } finally {
+                game.setGenerating(false);
+                notifier.notifyAllListener(game);
+            }
+        });
+
         games.put(code, game);
         joinGame(code, player);
         return game;
