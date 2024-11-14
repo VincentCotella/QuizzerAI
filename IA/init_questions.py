@@ -1,13 +1,31 @@
 
 from google.cloud import aiplatform
-
+from dotenv import load_dotenv
 import os
+import json 
 from google.oauth2 import service_account
 import vertexai
 from vertexai.preview.language_models import TextGenerationModel
 from vertexai.generative_models import GenerativeModel
 
-credentials = service_account.Credentials.from_service_account_file(r'C:\Users\lilyj\OneDrive - De Vinci\ESILV\A5 DIA\QuizzerAI\shining-energy-441715-q9-336c29f05a5a.json')
+
+# Charger les variables d'environnement du fichier .env
+load_dotenv()
+
+# Charger la clé JSON depuis la variable d'environnement
+credentials_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+
+# Convertir la chaîne JSON en dictionnaire Python
+credentials_info = json.loads(credentials_json)
+
+# Initialiser les informations d'identification
+credentials = service_account.Credentials.from_service_account_info(credentials_info)
+
+# Initialiser Vertex AI avec les informations d'identification
+project_id = "shining-energy-441715-q9"
+vertexai.init(project=project_id, location="us-central1", credentials=credentials)
+
+                                    
 PROJECT_ID = "shining-energy-441715-q9"
 REGION = "us-central1"
 
@@ -20,47 +38,57 @@ vertexai.init(
 
 model = GenerativeModel(model_name="gemini-1.5-flash-002")
 
-def generer_questions(theme: str, niveau_difficulte: str) -> str:
+import json
+
+def generer_questions(theme: str, niveau_difficulte: str, nbquestion : int):
     """
-    Génère des questions basées sur un thème et un niveau de difficulté.
+    Génère des questions QCM basées sur un thème et un niveau de difficulté.
 
     Paramètres:
     - theme (str): Le thème des questions.
     - niveau_difficulte (str): Le niveau de difficulté des questions.
 
     Retourne:
-    - str: Les questions générées.
-
-    
+    - dict: Les questions générées sous forme de JSON structuré.
     """
-    # Création du prompt en intégrant le thème et le niveau de difficulté
-    prompt = f"Créez dix questions de niveau {niveau_difficulte} sur le thème suivant : {theme}. Les questions doivent être de type qcm avec chacune 4 options de réponses dont une réponse juste."
-
-    # Génération du texte
-    response = model.generate_content(
-        prompt,
-        #temperature=0.7,
-        #max_output_tokens=512,
-        #top_p=0.8,
-        #top_k=40
-    )
-
-    # Retourne le texte généré
-    return response.text
+    # Simplifier le prompt pour réduire la complexité
+    prompt = f"""Génère '{nbquestion}' questions de type QCM sur le thème '{theme}' avec un niveau de difficulté '{niveau_difficulte}'.
+    Chaque question doit comporter quatre options de réponses et une seule réponse correcte.
+    Renvoie les questions sous forme d'un fichier JSON où chaque élément est structuré comme suit :
+    - "question" : la question posée
+    - "answers" : un tableau de quatre options de réponse
+    - "correct" : l'indice (0 à 3) de la réponse correcte.
+    """
+    
+    # Appeler le modèle pour générer le contenu
+    response = model.generate_content(prompt)
+    
+    # Nettoyer et convertir la réponse en JSON
+    questions = parse_questions(response.text)
+    
+    return questions
 
 def parse_questions(response_text):
-    """Parse response text to extract questions and options in JSON format."""
-    # This example assumes each question and its options are separated by newlines or another delimiter.
-    # Adjust parsing based on the actual format returned by the model.
-    questions = []
-    
-    # Example simple parsing, adjust based on actual response formatting
-    for line in response_text.split("\n"):
-        if line.strip():  # Skip empty lines
-            question_data = {"question": line.strip(), "options": ["Option A", "Option B", "Option C", "Option D"]}
-            questions.append(question_data)
+    """
+    Parse le texte de la réponse pour extraire les questions et options en format JSON.
 
-    return questions
+    Paramètres:
+    - response_text (str): Le texte brut de la réponse du modèle.
+
+    Retourne:
+    - list: Une liste de questions structurées en JSON.
+    """
+    # Supprimer les caractères superflus potentiels et charger en JSON
+    clean_response = response_text.strip("```json\n").strip("\n```")
+    
+    try:
+        questions_json = json.loads(clean_response)
+    except json.JSONDecodeError as e:
+        print("Erreur de décodage JSON:", e)
+        return []
+    
+    return questions_json
+
 
 
 
