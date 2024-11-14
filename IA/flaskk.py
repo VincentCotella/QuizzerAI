@@ -16,13 +16,14 @@ def generer():
         # Extraire le thème et le niveau de difficulté
         theme = data.get('theme')
         niveau_difficulte = data.get('niveau_difficulte')
+        nbquestion = data.get('nbquestion')
 
         # Vérifier que les paramètres sont présents
         if not theme or not niveau_difficulte:
             return jsonify({'error': 'Les paramètres "theme" et "niveau_difficulte" sont requis.'}), 400
 
         # Appeler la fonction logique pour générer les questions
-        questions = generer_questions(theme, niveau_difficulte)
+        questions = generer_questions(theme, niveau_difficulte, nbquestion)
 
         # Retourner les résultats sous forme de JSON
         return jsonify({'questions': questions}), 200

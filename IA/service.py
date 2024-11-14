@@ -8,7 +8,7 @@ from vertexai.preview.language_models import TextGenerationModel
 from vertexai.generative_models import GenerativeModel
 
 credentials = service_account.Credentials.from_service_account_file(
-    r'C:\Users\romai\Documents\ESILV A5\QuizzerAI\IA\projet1-441715-44c008773c1a.json'
+    r'C:\Users\romai\Documents\ESILV A5\QuizzerAI\IA\projet1-441715-f679d4bf8316.json'
 )
 PROJECT_ID = "projet1-441715"
 REGION = "us-central1"
@@ -50,5 +50,11 @@ def generer_questions(theme: str, niveau_difficulte: str) -> str:
     # Retourne le texte généré
     return response.text
 
+def test_generation():
+    response = model.generate_content(
+        "comment vas-tu"
+    )
+    print(f"Réponse : {response.text}")
 
+test_generation()
 
