@@ -1,8 +1,8 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:quiz_app/screens/home_screen.dart';
-import 'package:quiz_app/screens/create_game_screen.dart';
-import 'package:quiz_app/screens/join_game_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/create_game_screen.dart';
+import 'screens/join_game_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => HomeScreen(),
         '/create_game': (context) => CreateGameScreen(),
         '/join_game': (context) => JoinGameScreen(),
-        // Supprimer la route '/game_lounge' car elle nécessite un paramètre dynamique
+        // La route vers GameLoungeScreen nécessite un paramètre dynamique, elle sera gérée via Navigator
       },
       debugShowCheckedModeBanner: false,
     );

@@ -1,4 +1,5 @@
 // lib/screens/create_game_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -6,11 +7,11 @@ import 'dart:convert';
 import 'game_lounge_screen.dart'; // Importez l'écran du salon de jeu
 
 enum Difficulty {
-  BEGINNER("débutant"),
-  EASY("facile"),
-  INTERMEDIATE("intermédiaire"),
-  HARD("difficile"),
-  ADVANCED("avancé");
+  BEGINNER("Débutant"),
+  EASY("Facile"),
+  INTERMEDIATE("Intermédiaire"),
+  HARD("Difficile"),
+  ADVANCED("Avancé");
 
   const Difficulty(this.label);
   final String label;
@@ -36,7 +37,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   int? _selectedNumberOfQuestions;
   bool _isLoading = false;
 
-  // Remplacez par l'URL de votre backend
+  // URL de base pour les requêtes au backend
   final String _createGameBaseUrl = 'https://192.168.1.170:8543/game';
 
   // Liste des thèmes prédéfinis avec des icônes
@@ -46,7 +47,6 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     ThemeOption(name: 'Géographie', icon: Icons.public),
     ThemeOption(name: 'Littérature', icon: Icons.book),
     ThemeOption(name: 'Art', icon: Icons.palette),
-    ThemeOption(name: 'Technologie', icon: Icons.computer),
     ThemeOption(name: 'Autre', icon: Icons.more_horiz),
   ];
 
@@ -61,11 +61,46 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     _selectedNumberOfQuestions = _numberOfQuestionsOptions[1]; // Sélection par défaut (10)
   }
 
+  Future<bool> _isPlayerInGame() async {
+    final url = 'https://192.168.1.170:8543/player';
+    try {
+      final response = await http.get(Uri.parse(url), headers: {
+        'Content-Type': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        return data['inGame'] == true;
+      } else {
+        // Gérer les autres codes de statut si nécessaire
+        return false;
+      }
+    } catch (e) {
+      // Gestion des erreurs de connexion
+      print('Erreur lors de la vérification de l\'état du joueur : $e');
+      return false;
+    }
+  }
+
   Future<void> _createGame() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
+
+      // Vérifier si le joueur est déjà dans une partie
+      bool inGame = await _isPlayerInGame();
+      if (inGame) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Vous êtes déjà dans une partie. Veuillez la quitter avant d\'en créer une nouvelle.')),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
 
       // Déterminer le thème
       String theme = _selectedTheme == 'Autre' ? _customTheme : _selectedTheme!;
@@ -90,18 +125,22 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         );
 
         if (response.statusCode == 200) {
-          final data = json.decode(response.body);
-          String gameCode = data['code'].toString(); // Code PIN de la partie
-
-          // Naviguer vers le salon de jeu avec le gameCode
+          // Naviguer vers le salon de jeu
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-                builder: (context) => GameLoungeScreen(gameCode: gameCode)),
+            MaterialPageRoute(builder: (context) => GameLoungeScreen()),
             (Route<dynamic> route) => route.isFirst,
           );
+        } else if (response.statusCode == 400) {
+          // Supposons que le serveur retourne 400 avec un message spécifique
+          final data = json.decode(response.body);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text(data['message'] ?? 'Erreur lors de la création de la partie.')),
+          );
         } else {
-          // Afficher une erreur
+          // Afficher une erreur générique
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
                 content: Text(
@@ -110,6 +149,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         }
       } catch (e) {
         // Gestion des erreurs de connexion
+        print('Exception attrapée : $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur de connexion. Veuillez réessayer.')),
         );
@@ -121,6 +161,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     }
   }
 
+  // Méthode pour construire les options de thème
   Widget _buildThemeOption(ThemeOption themeOption) {
     bool isSelected = _selectedTheme == themeOption.name;
     bool isOther = themeOption.name == 'Autre';
@@ -183,8 +224,30 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     );
   }
 
+  // Méthode pour construire les options de difficulté
   Widget _buildDifficultyOption(Difficulty difficulty) {
     bool isSelected = _selectedDifficulty == difficulty;
+
+    // Déterminer le nombre d'étoiles selon la difficulté
+    int starCount;
+    switch (difficulty) {
+      case Difficulty.BEGINNER:
+        starCount = 1;
+        break;
+      case Difficulty.EASY:
+        starCount = 2;
+        break;
+      case Difficulty.INTERMEDIATE:
+        starCount = 3;
+        break;
+      case Difficulty.HARD:
+        starCount = 4;
+        break;
+      case Difficulty.ADVANCED:
+        starCount = 5;
+        break;
+    }
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -214,21 +277,24 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                difficulty.name, // Affiche l'identifiant en majuscule
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Color(0xFF8E24AA),
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
+              // Afficher le nombre d'étoiles au-dessus du niveau
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  starCount,
+                  (index) => Icon(
+                    Icons.star,
+                    size: 16.0,
+                    color: isSelected ? Colors.white : Color(0xFF8E24AA),
+                  ),
                 ),
               ),
               SizedBox(height: 8.0),
               Text(
-                difficulty.label.capitalize(), // Capitalise la première lettre du label
-                textAlign: TextAlign.center,
+                difficulty.label, // Affiche le label en français
                 style: TextStyle(
                   color: isSelected ? Colors.white : Color(0xFF8E24AA),
-                  fontSize: 14.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -239,6 +305,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     );
   }
 
+  // Méthode pour construire les options du nombre de questions
   Widget _buildNumberOfQuestionsOption(int number) {
     bool isSelected = _selectedNumberOfQuestions == number;
     return Material(
@@ -339,29 +406,23 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       // Sélection du thème
                       Text(
                         'Choisissez un thème:',
-                        style:
-                            TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8.0),
                       SizedBox(
                         height: 120.0,
-                        child: ListView.builder(
+                        child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           padding: EdgeInsets.symmetric(horizontal: padding),
-                          itemCount: _themes.length + 1, // Padding de fin
+                          itemCount: _themes.length,
+                          separatorBuilder: (context, index) =>
+                              SizedBox(width: padding),
                           itemBuilder: (context, index) {
-                            if (index < _themes.length) {
-                              return Padding(
-                                padding: EdgeInsets.only(right: padding),
-                                child: SizedBox(
-                                  width: themeItemWidth,
-                                  child: _buildThemeOption(_themes[index]),
-                                ),
-                              );
-                            } else {
-                              // Padding de fin
-                              return SizedBox(width: padding);
-                            }
+                            return SizedBox(
+                              width: themeItemWidth,
+                              child: _buildThemeOption(_themes[index]),
+                            );
                           },
                         ),
                       ),
@@ -399,30 +460,24 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       // Sélection de la difficulté
                       Text(
                         'Sélectionnez la difficulté:',
-                        style:
-                            TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8.0),
                       SizedBox(
                         height: 120.0,
-                        child: ListView.builder(
+                        child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           padding: EdgeInsets.symmetric(horizontal: padding),
-                          itemCount: Difficulty.values.length + 1, // Padding
+                          itemCount: Difficulty.values.length,
+                          separatorBuilder: (context, index) =>
+                              SizedBox(width: padding),
                           itemBuilder: (context, index) {
-                            if (index < Difficulty.values.length) {
-                              return Padding(
-                                padding: EdgeInsets.only(right: padding),
-                                child: SizedBox(
-                                  width: difficultyItemWidth,
-                                  child:
-                                      _buildDifficultyOption(Difficulty.values[index]),
-                                ),
-                              );
-                            } else {
-                              // Padding de fin
-                              return SizedBox(width: padding);
-                            }
+                            return SizedBox(
+                              width: difficultyItemWidth,
+                              child:
+                                  _buildDifficultyOption(Difficulty.values[index]),
+                            );
                           },
                         ),
                       ),
@@ -430,29 +485,24 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       // Sélection du nombre de questions
                       Text(
                         'Nombre de questions:',
-                        style:
-                            TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8.0),
                       SizedBox(
                         height: 120.0,
-                        child: ListView.builder(
+                        child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           padding: EdgeInsets.symmetric(horizontal: padding),
-                          itemCount: _numberOfQuestionsOptions.length + 1,
+                          itemCount: _numberOfQuestionsOptions.length,
+                          separatorBuilder: (context, index) =>
+                              SizedBox(width: padding),
                           itemBuilder: (context, index) {
-                            if (index < _numberOfQuestionsOptions.length) {
-                              return Padding(
-                                padding: EdgeInsets.only(right: padding),
-                                child: SizedBox(
-                                  width: questionsItemWidth,
-                                  child: _buildNumberOfQuestionsOption(
-                                      _numberOfQuestionsOptions[index]),
-                                ),
-                              );
-                            } else {
-                              return SizedBox(width: padding);
-                            }
+                            return SizedBox(
+                              width: questionsItemWidth,
+                              child: _buildNumberOfQuestionsOption(
+                                  _numberOfQuestionsOptions[index]),
+                            );
                           },
                         ),
                       ),
@@ -482,13 +532,5 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
               ),
       ),
     );
-  }
-}
-
-// Extension pour capitaliser la première lettre
-extension StringCasingExtension on String {
-  String capitalize() {
-    if (this.length == 0) return this;
-    return '${this[0].toUpperCase()}${this.substring(1)}';
   }
 }

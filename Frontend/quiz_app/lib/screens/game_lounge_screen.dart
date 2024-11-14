@@ -1,12 +1,11 @@
 // lib/screens/game_lounge_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class GameLoungeScreen extends StatefulWidget {
-  final String gameCode;
-
-  GameLoungeScreen({required this.gameCode});
+  GameLoungeScreen();
 
   @override
   _GameLoungeScreenState createState() => _GameLoungeScreenState();
@@ -16,8 +15,8 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
   bool _isLoading = true;
   Map<String, dynamic>? _gameDetails;
 
-  // Remplacez par l'URL de votre backend
-  final String _getGameDetailsUrl = 'https://192.168.1.170:8543/game/details';
+  // URL pour les requêtes au backend
+  final String _gameUrl = 'https://192.168.1.170:8543/game';
 
   @override
   void initState() {
@@ -31,13 +30,9 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
     });
 
     try {
-      // Construire l'URL avec les paramètres de requête
-      Uri url = Uri.parse(_getGameDetailsUrl).replace(queryParameters: {
-        'code': widget.gameCode,
-      });
-
-      final response = await http.post(
-        url,
+      // Envoyer une requête GET à /game pour obtenir les détails de la partie actuelle
+      final response = await http.get(
+        Uri.parse(_gameUrl),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -45,9 +40,22 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
         final data = json.decode(response.body);
         setState(() {
           _gameDetails = data;
+          _isLoading = false;
         });
+      } else if (response.statusCode == 404) {
+        // Partie non trouvée
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Partie non trouvée.')),
+        );
+        Navigator.pop(context); // Retourner à l'écran précédent
       } else {
         // Afficher une erreur
+        setState(() {
+          _isLoading = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
@@ -55,7 +63,50 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
         );
       }
     } catch (e) {
-      // Gestion des erreurs de connexion
+      setState(() {
+        _isLoading = false;
+      });
+      print('Exception attrapée : $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur de connexion. Veuillez réessayer.')),
+      );
+    }
+  }
+
+  Future<void> _deleteGame() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Envoyer une requête DELETE à /game pour quitter la partie
+      final response = await http.delete(
+        Uri.parse(_gameUrl),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Vous avez quitté la partie.')),
+        );
+        // Naviguer vers l'écran d'accueil
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      } else if (response.statusCode == 400) {
+        final data = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  data['message'] ?? 'Erreur lors de la suppression de la partie.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Erreur lors de la suppression de la partie. Code: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      print('Exception attrapée : $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur de connexion. Veuillez réessayer.')),
       );
@@ -66,7 +117,7 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
     }
   }
 
-  Widget _buildPlayerList(List<dynamic> players, {bool isJoined = false}) {
+  Widget _buildPlayerList(List<dynamic> players) {
     return players.isNotEmpty
         ? ListView.builder(
             shrinkWrap: true,
@@ -76,16 +127,14 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
               var player = players[index];
               return ListTile(
                 leading: Icon(
-                  isJoined ? Icons.check_circle : Icons.person,
-                  color: isJoined ? Colors.green : Colors.blue,
+                  Icons.person,
+                  color: Colors.blue,
                 ),
                 title: Text(player['name'] ?? 'Inconnu'),
               );
             },
           )
-        : Text(isJoined
-            ? 'Aucun joueur n\'a rejoint la partie.'
-            : 'Aucun joueur connecté.');
+        : Text('Aucun joueur connecté.');
   }
 
   @override
@@ -94,6 +143,13 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
       appBar: AppBar(
         title: Text('Salon de Jeu'),
         backgroundColor: Color(0xFF6A1B9A),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            onPressed: _deleteGame,
+            tooltip: 'Quitter la partie',
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -134,24 +190,29 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
                         SizedBox(height: 8.0),
                         _buildPlayerList(_gameDetails!['players']),
                         SizedBox(height: 24.0),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Logique pour démarrer le quiz si vous êtes le maître du jeu
-                            // Par exemple, vérifier si vous êtes le créateur de la partie et lancer le quiz
-                            // Cette fonctionnalité peut être implémentée selon vos besoins
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 40.0, vertical: 15.0),
-                            backgroundColor: Color(0xFF6A1B9A),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Logique pour démarrer le quiz si vous êtes le maître du jeu
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Fonctionnalité de démarrage du quiz à implémenter.')),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 40.0, vertical: 15.0),
+                              backgroundColor: Color(0xFF6A1B9A),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            'Démarrer le Quiz',
-                            style: TextStyle(fontSize: 20.0),
+                            child: Text(
+                              'Démarrer le Quiz',
+                              style: TextStyle(fontSize: 20.0),
+                            ),
                           ),
                         ),
                       ],
