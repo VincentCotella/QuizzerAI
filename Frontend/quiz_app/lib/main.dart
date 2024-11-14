@@ -1,8 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:quiz_app/screens/home_screen.dart';
-import 'package:quiz_app/screens/quiz_screen.dart';
-import 'package:quiz_app/screens/results_screen.dart';
 import 'package:quiz_app/screens/create_game_screen.dart';
 import 'package:quiz_app/screens/join_game_screen.dart';
 
@@ -27,9 +25,9 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Poppins',
         textTheme: TextTheme(
-          displayLarge:
-              TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
+          displayLarge: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
           bodyLarge: TextStyle(fontSize: 16.0),
+          // Ajoutez d'autres styles si nécessaire
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -45,11 +43,11 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
-        '/quiz': (context) => QuizScreen(),
-        '/results': (context) => ResultsScreen(),
         '/create_game': (context) => CreateGameScreen(),
         '/join_game': (context) => JoinGameScreen(),
+        // Supprimer la route '/game_lounge' car elle nécessite un paramètre dynamique
       },
+      debugShowCheckedModeBanner: false,
     );
   }
 }

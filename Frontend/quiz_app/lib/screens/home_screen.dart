@@ -106,7 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         child: Center(
-          child: SingleChildScrollView( // Pour éviter les débordements sur petits écrans
+          child: SingleChildScrollView(
+            // Pour éviter les débordements sur petits écrans
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -126,25 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       .copyWith(color: Colors.white),
                 ),
                 SizedBox(height: 50.0),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/quiz');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 40.0, vertical: 15.0),
-                    backgroundColor: Colors.white,
-                    foregroundColor: Color(0xFF8E24AA),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                  ),
-                  child: Text(
-                    'Commencer le Quiz',
-                    style: TextStyle(fontSize: 20.0),
-                  ),
-                ),
-                SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/create_game');
