@@ -7,7 +7,7 @@ import vertexai
 from vertexai.preview.language_models import TextGenerationModel
 from vertexai.generative_models import GenerativeModel
 
-credentials = service_account.Credentials.from_service_account_file(r'C:\Users\lilyj\OneDrive - De Vinci\ESILV\A5 DIA\QuizzerAI\shining-energy-441715-q9-336c29f05a5a.json')
+credentials = service_account.Credentials.from_service_account_file(r'C:\Users\lilyj\OneDrive - De Vinci\ESILV\A5 DIA\QuizzerAI\IA\.env')
 PROJECT_ID = "shining-energy-441715-q9"
 REGION = "us-central1"
 
