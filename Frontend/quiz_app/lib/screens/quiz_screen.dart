@@ -1,7 +1,13 @@
 // lib/screens/quiz_screen.dart
 import 'package:flutter/material.dart';
 import 'package:quiz_app/dto/game.dart';
-import 'package:quiz_app/stage/game_lounge_stage.dart';
+import 'package:quiz_app/stage/answer_stage.dart';
+import 'package:quiz_app/stage/ending_stage.dart';
+import 'package:quiz_app/stage/generating_stage.dart';
+import 'package:quiz_app/stage/point_stage.dart';
+import 'package:quiz_app/stage/question_stage.dart';
+import 'package:quiz_app/stage/starting_stage.dart';
+import 'package:quiz_app/stage/waiting_for_player_stage.dart';
 import 'package:websocket_universal/websocket_universal.dart';
 import 'dart:convert';
 
@@ -53,25 +59,27 @@ class _QuizScreenState extends State<QuizScreen> {
     var state = widget.game.state;
 
     if (state == "GENERATING") {
-
+      return GeneratingStage(game: widget.game);
     }
     else if (state == "WAITING FOR PLAYER") {
-      
+      return WaitingForPlayerStage(game: widget.game);
     }
     else if (state == "STARTING") {
-
+      return StartingStage(game: widget.game);
     }
     else if (state == "QUESTION") {
-
+      return QuestionStage(widget.game);
     }
     else if (state == "ANSWERS") {
-
+      return AnswerStage(widget.game);
     }
     else if (state == "POINTS") {
-
+      return PointsStage(widget.game);
     }
     else if (state == "ENDING") {
-
+      return EndingStage(widget.game);
     }
+
+    return const Text("Unknown stage");
   }
 }
