@@ -46,9 +46,9 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
-        '/create_game': (context) => CreateGameScreen(ModalRoute.of(context)!.settings.arguments as Player),
+        '/create_game': (context) => CreateGameScreen(),
         '/join_game': (context) => JoinGameScreen(),
-        '/game': (context) => QuizScreen(game: ModalRoute.of(context)!.settings.arguments as Game),
+        '/game': (context) => QuizScreen(),
         '/results': (context) => ResultsScreen(),
       },
       debugShowCheckedModeBanner: false,

@@ -1,4 +1,6 @@
 // lib/screens/quiz_screen.dart
+import 'package:http/http.dart' as http;
+
 import 'package:flutter/material.dart';
 import 'package:quiz_app/dto/game.dart';
 import 'package:quiz_app/stage/answer_stage.dart';
@@ -13,9 +15,9 @@ import 'dart:convert';
 
 // ignore: must_be_immutable
 class QuizScreen extends StatefulWidget {
-  Game game;
+  late Game game;
 
-  QuizScreen({super.key, required this.game});
+  QuizScreen({super.key});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -25,8 +27,11 @@ class _QuizScreenState extends State<QuizScreen> {
   late IWebSocketHandler<String, String> _channel;
 
   @override
-  void initState() {
+  Future<void> initState() async {
     super.initState();
+
+    var d = await http.get(Uri.parse('https://192.168.1.170:8543/game'));
+    widget.game = Game.fromJson(jsonDecode(d.body));
     _connectToWebSocket();
   }
 

@@ -26,15 +26,14 @@ class ThemeOption {
 }
 
 class CreateGameScreen extends StatefulWidget {
-  final Player player;
-
-  const CreateGameScreen(this.player, {super.key});
+  const CreateGameScreen({super.key});
 
   @override
   State<CreateGameScreen> createState() => _CreateGameScreenState();
 }
 
 class _CreateGameScreenState extends State<CreateGameScreen> {
+  late Future<Player> player;
   final _formKey = GlobalKey<FormState>();
   String? _selectedTheme;
   String _customTheme = '';
@@ -64,6 +63,12 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     _selectedTheme = _themes[0].name; // Sélection par défaut
     _selectedDifficulty = Difficulty.EASY; // Sélection par défaut
     _selectedNumberOfQuestions = _numberOfQuestionsOptions[1]; // Sélection par défaut (10)
+
+    const url = 'https://192.168.1.170:8543/player';
+
+    player = http.get(Uri.parse(url))
+        .then((data) => jsonDecode(data.body))
+        .then((json) => Player.fromJson(json));
   }
 
   Future<void> _createGame() async {
