@@ -1,22 +1,10 @@
 // lib/screens/create_game_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:quiz_app/dto/game.dart';
-import 'dart:convert';
+import 'package:quiz_app/dto/difficulty.dart';
 
-import 'package:quiz_app/dto/player.dart';
-
-enum Difficulty {
-  BEGINNER("Débutant"),
-  EASY("Facile"),
-  INTERMEDIATE("Intermédiaire"),
-  HARD("Difficile"),
-  ADVANCED("Avancé");
-
-  const Difficulty(this.label);
-  final String label;
-}
+import 'package:quiz_app/service/http_service.dart' as http_service;
+import 'package:quiz_app/service/navigation_service.dart';
 
 class ThemeOption {
   final String name;
@@ -33,18 +21,12 @@ class CreateGameScreen extends StatefulWidget {
 }
 
 class _CreateGameScreenState extends State<CreateGameScreen> {
-  late Future<Player> player;
   final _formKey = GlobalKey<FormState>();
   String? _selectedTheme;
   String _customTheme = '';
   Difficulty? _selectedDifficulty;
   int? _selectedNumberOfQuestions;
-  bool _isLoading = false;
 
-  // URL de base pour les requêtes au backend
-  final String _createGameBaseUrl = 'https://192.168.1.170:8543/game';
-
-  // Liste des thèmes prédéfinis avec des icônes
   final List<ThemeOption> _themes = [
     ThemeOption(name: 'Science', icon: Icons.science),
     ThemeOption(name: 'Histoire', icon: Icons.history_edu),
@@ -63,71 +45,20 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     _selectedTheme = _themes[0].name; // Sélection par défaut
     _selectedDifficulty = Difficulty.EASY; // Sélection par défaut
     _selectedNumberOfQuestions = _numberOfQuestionsOptions[1]; // Sélection par défaut (10)
-
-    const url = 'https://192.168.1.170:8543/player';
-
-    player = http.get(Uri.parse(url))
-        .then((data) => jsonDecode(data.body))
-        .then((json) => Player.fromJson(json));
   }
 
   Future<void> _createGame() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });      
+    String theme = _selectedTheme == 'Autre' ? _customTheme : _selectedTheme!;
+    Difficulty difficulty = difficultyFromString(_selectedDifficulty!.name);
+    int numberOfQuestions = _selectedNumberOfQuestions!;
 
-      // Déterminer le thème
-      String theme = _selectedTheme == 'Autre' ? _customTheme : _selectedTheme!;
 
-      // Déterminer la difficulté en utilisant l'identifiant de l'énumération (majuscule)
-      String difficulty = _selectedDifficulty!.name;
-
-      // Déterminer le nombre de questions
-      int numberOfQuestions = _selectedNumberOfQuestions!;
-
-      // Construire l'URL avec les paramètres de requête
-      Uri url = Uri.parse(_createGameBaseUrl).replace(queryParameters: {
-        'difficulty': difficulty, // Utiliser l'identifiant en majuscule
-        'theme': theme,
-        'count': numberOfQuestions.toString(),
-      });
-
-      try {
-        final response = await http.post(url);
-
-        if (response.statusCode == 200) {
-          var game = Game.fromJson(jsonDecode(response.body));
-          // Naviguer vers le salon de jeu
-          Navigator.pushNamed(context, '/game', arguments: game);
-        } else if (response.statusCode == 400) {
-          // Supposons que le serveur retourne 400 avec un message spécifique
-          final data = json.decode(response.body);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text(data['message'] ?? 'Erreur lors de la création de la partie.')),
-          );
-        } else {
-          // Afficher une erreur générique
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    'Erreur lors de la création de la partie. Code: ${response.statusCode}')),
-          );
-        }
-      } catch (e) {
-        // Gestion des erreurs de connexion
-        print('Exception attrapée : $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur de connexion. Veuillez réessayer.')),
-        );
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    http_service.createGame(difficulty, theme, numberOfQuestions)
+      .then((game) => goToGame(context, game))
+      .catchError((error) => showDialog(
+        context: context, 
+        builder: (context) => const Text("Unable to create a game"),
+      ));
   }
 
   // Méthode pour construire les options de thème
@@ -144,13 +75,13 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         },
         borderRadius: BorderRadius.circular(12.0),
         child: Container(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
             color: isSelected
-                ? Color(0xFFBA68C8)
+                ? const Color(0xFFBA68C8)
                 : (isOther ? Colors.orange.shade100 : Colors.white),
             borderRadius: BorderRadius.circular(12.0),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 4.0,
@@ -159,7 +90,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
             ],
             border: Border.all(
               color: isSelected
-                  ? Color(0xFF8E24AA)
+                  ? const Color(0xFF8E24AA)
                   : (isOther ? Colors.orange.shade700 : Colors.grey.shade300),
               width: 2.0,
             ),
@@ -172,16 +103,16 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                 size: 30.0,
                 color: isSelected
                     ? Colors.white
-                    : (isOther ? Colors.orange.shade700 : Color(0xFF8E24AA)),
+                    : (isOther ? Colors.orange.shade700 : const Color(0xFF8E24AA)),
               ),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 8.0),
               Text(
                 themeOption.name,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: isSelected
                       ? Colors.white
-                      : (isOther ? Colors.orange.shade700 : Color(0xFF8E24AA)),
+                      : (isOther ? Colors.orange.shade700 : const Color(0xFF8E24AA)),
                   fontSize: 14.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -196,27 +127,8 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   // Méthode pour construire les options de difficulté
   Widget _buildDifficultyOption(Difficulty difficulty) {
     bool isSelected = _selectedDifficulty == difficulty;
-
-    // Déterminer le nombre d'étoiles selon la difficulté
-    int starCount;
-    switch (difficulty) {
-      case Difficulty.BEGINNER:
-        starCount = 1;
-        break;
-      case Difficulty.EASY:
-        starCount = 2;
-        break;
-      case Difficulty.INTERMEDIATE:
-        starCount = 3;
-        break;
-      case Difficulty.HARD:
-        starCount = 4;
-        break;
-      case Difficulty.ADVANCED:
-        starCount = 5;
-        break;
-    }
-
+    int starCount = difficulty.index + 1;
+    
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -227,11 +139,11 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         },
         borderRadius: BorderRadius.circular(12.0),
         child: Container(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: isSelected ? Color(0xFFBA68C8) : Colors.white,
+            color: isSelected ? const Color(0xFFBA68C8) : Colors.white,
             borderRadius: BorderRadius.circular(12.0),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 4.0,
@@ -239,7 +151,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
               ),
             ],
             border: Border.all(
-              color: isSelected ? Color(0xFF8E24AA) : Colors.grey.shade300,
+              color: isSelected ? const Color(0xFF8E24AA) : Colors.grey.shade300,
               width: 2.0,
             ),
           ),
@@ -254,15 +166,15 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                   (index) => Icon(
                     Icons.star,
                     size: 16.0,
-                    color: isSelected ? Colors.white : Color(0xFF8E24AA),
+                    color: isSelected ? Colors.white : const Color(0xFF8E24AA),
                   ),
                 ),
               ),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 8.0),
               Text(
                 difficulty.label, // Affiche le label en français
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Color(0xFF8E24AA),
+                  color: isSelected ? Colors.white : const Color(0xFF8E24AA),
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -287,12 +199,12 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         },
         borderRadius: BorderRadius.circular(12.0),
         child: Container(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            color: isSelected ? Color(0xFFBA68C8) : Colors.white,
+            color: isSelected ? const Color(0xFFBA68C8) : Colors.white,
             borderRadius: BorderRadius.circular(12.0),
             border: Border.all(
-              color: isSelected ? Color(0xFF8E24AA) : Colors.grey.shade300,
+              color: isSelected ? const Color(0xFF8E24AA) : Colors.grey.shade300,
               width: 2.0,
             ),
           ),
@@ -302,17 +214,17 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
               Text(
                 '$number',
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Color(0xFF8E24AA),
+                  color: isSelected ? Colors.white : const Color(0xFF8E24AA),
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 8.0),
               Text(
                 'Questions',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Color(0xFF8E24AA),
+                  color: isSelected ? Colors.white : const Color(0xFF8E24AA),
                   fontSize: 14.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -359,26 +271,24 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Créer Partie'),
-        backgroundColor: Color(0xFF6A1B9A),
+        title: const Text('Créer Partie'),
+        backgroundColor: const Color(0xFF6A1B9A),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Form(
+        child: Form(
                 key: _formKey, // Clé du formulaire
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Sélection du thème
-                      Text(
+                      const Text(
                         'Choisissez un thème:',
                         style: TextStyle(
                             fontSize: 18.0, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 8.0),
                       SizedBox(
                         height: 120.0,
                         child: ListView.separated(
@@ -395,22 +305,22 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                           },
                         ),
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       // Champ de thème personnalisé
                       if (_selectedTheme == 'Autre') ...[
-                        Text(
+                        const Text(
                           'Entrez votre thème:',
                           style: TextStyle(
                               fontSize: 18.0, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 8.0),
+                        const SizedBox(height: 8.0),
                         TextFormField(
                           onChanged: (value) {
                             setState(() {
                               _customTheme = value;
                             });
                           },
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                             hintText: 'Votre thème',
                             contentPadding: EdgeInsets.symmetric(
@@ -424,15 +334,15 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 16.0),
+                        const SizedBox(height: 16.0),
                       ],
                       // Sélection de la difficulté
-                      Text(
+                      const Text(
                         'Sélectionnez la difficulté:',
                         style: TextStyle(
                             fontSize: 18.0, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 8.0),
                       SizedBox(
                         height: 120.0,
                         child: ListView.separated(
@@ -450,7 +360,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                           },
                         ),
                       ),
-                      SizedBox(height: 16.0),
+                      const SizedBox(height: 16.0),
                       // Sélection du nombre de questions
                       const Text(
                         'Nombre de questions:',

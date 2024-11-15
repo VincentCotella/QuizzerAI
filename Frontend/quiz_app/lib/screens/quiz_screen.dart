@@ -1,6 +1,3 @@
-// lib/screens/quiz_screen.dart
-import 'package:http/http.dart' as http;
-
 import 'package:flutter/material.dart';
 import 'package:quiz_app/dto/game.dart';
 import 'package:quiz_app/stage/answer_stage.dart';
@@ -11,13 +8,14 @@ import 'package:quiz_app/stage/question_stage.dart';
 import 'package:quiz_app/stage/starting_stage.dart';
 import 'package:quiz_app/stage/waiting_for_player_stage.dart';
 import 'package:websocket_universal/websocket_universal.dart';
-import 'dart:convert';
+
+import 'package:quiz_app/service/ws_service.dart' as ws_service;
 
 // ignore: must_be_immutable
 class QuizScreen extends StatefulWidget {
-  late Game game;
+  Game game;
 
-  QuizScreen({super.key});
+  QuizScreen(this.game, {super.key});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -30,32 +28,14 @@ class _QuizScreenState extends State<QuizScreen> {
   Future<void> initState() async {
     super.initState();
 
-    var d = await http.get(Uri.parse('https://192.168.1.170:8543/game'));
-    widget.game = Game.fromJson(jsonDecode(d.body));
-    _connectToWebSocket();
-  }
-
-  Future<void> _connectToWebSocket() async {
-    const wsUrl = 'wss://192.168.1.170:8543/game/live';
-    final textSocketHandler = IWebSocketHandler<String, String>.createClient(wsUrl, SocketSimpleTextProcessor());
-
-    textSocketHandler.incomingMessagesStream.listen((inMsg) {
-      print('> "$inMsg"');
-      setState(() {
-        widget.game = Game.fromJson(jsonDecode(inMsg));
-      });
-    });
-
-    await textSocketHandler.connect(params: SocketOptionalParams(
-      headers: {
-        'X-GameCode': widget.game.code,
-      },
-    ));
+    _channel = ws_service.listenGame(widget.game.code, (game) => setState(() {
+      widget.game = game;
+    }));
   }
 
   @override
   void dispose() {
-    _channel.disconnect("normal"); // Ferme la connexion WebSocket lorsque l'écran est fermé
+    _channel.disconnect("normal");
     super.dispose();
   }
 

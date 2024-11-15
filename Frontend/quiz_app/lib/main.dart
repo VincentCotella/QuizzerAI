@@ -1,7 +1,5 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:quiz_app/dto/game.dart';
-import 'package:quiz_app/dto/player.dart';
 import 'package:quiz_app/screens/quiz_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/create_game_screen.dart';
@@ -9,12 +7,14 @@ import 'screens/join_game_screen.dart';
 import 'stage/results_stage.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final Color primaryColor = Color(0xFF6A1B9A);
-  final Color accentColor = Color(0xFFFFC107);
+  final Color primaryColor = const Color(0xFF6A1B9A);
+  final Color accentColor = const Color(0xFFFFC107);
+
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: Colors.white,
         fontFamily: 'Poppins',
-        textTheme: TextTheme(
+        textTheme: const TextTheme(
           displayLarge: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
           bodyLarge: TextStyle(fontSize: 16.0),
         ),
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: accentColor,
             foregroundColor: Colors.white,
-            textStyle: TextStyle(fontSize: 18.0),
+            textStyle: const TextStyle(fontSize: 18.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
             ),
@@ -45,10 +45,10 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => HomeScreen(),
-        '/create_game': (context) => CreateGameScreen(),
-        '/join_game': (context) => JoinGameScreen(),
-        '/game': (context) => QuizScreen(),
+        '/': (context) => const HomeScreen(),
+        '/create_game': (context) => const CreateGameScreen(),
+        '/join_game': (context) => const JoinGameScreen(),
+        '/game': (context) => QuizScreen(ModalRoute.settingsOf(context)!.arguments as Game),
         '/results': (context) => ResultsScreen(),
       },
       debugShowCheckedModeBanner: false,

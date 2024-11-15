@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quiz_app/stage/abstract_stage.dart';
 import 'package:quiz_app/dto/game.dart';
 
 class AnswerStage extends StatefulWidget {

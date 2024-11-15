@@ -1,10 +1,8 @@
-// lib/screens/home_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
+import 'package:quiz_app/service/http_service.dart' as http_service;
 import 'package:quiz_app/dto/player.dart';
+import 'package:quiz_app/service/navigation_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,14 +17,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    const url = 'https://192.168.1.170:8543/player';
-
-    player = http.get(Uri.parse(url))
-        .then((data) => jsonDecode(data.body))
-        .then((json) => Player.fromJson(json));
-
+    player = http_service.fetchPlayer();
     player.then((value) {
-      if (value.name == null) {
+      if (value.inGame) {
+        http_service.fetchGame()
+          .then((game) => goToGame(context, game));
+      }
+      else if (value.name == null) {
         _showEditNameDialog();
       }
     });
@@ -51,7 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 if (newName.isNotEmpty) {
                   Navigator.of(context).pop();
-                  _updatePlayerName(newName);
+                  setState(() {
+                    player = http_service.changeName(newName);
+                  });
                 }
               },
               child: const Text("OK"),
@@ -60,16 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
-  }
-
-  Future<void> _updatePlayerName(String name) async {
-    final url = 'https://192.168.1.170:8543/player/name?value=$name';
-    
-    setState(() {
-      player = http.post(Uri.parse(url))
-          .then((resp) => jsonDecode(resp.body))
-          .then((json) => Player.fromJson(json));
-    });
   }
 
   @override
@@ -123,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               }
                             : () {
-                                
+
                                 Navigator.pushNamed(context, '/create_game', arguments: p);
                               },
                         style: ElevatedButton.styleFrom(
