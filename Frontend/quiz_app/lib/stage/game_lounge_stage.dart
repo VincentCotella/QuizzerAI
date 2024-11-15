@@ -2,8 +2,34 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:quiz_app/dto/game.dart';
 import 'dart:convert';
-import 'quiz_screen.dart';
+import '../screens/quiz_screen.dart';
+
+class StageLoungeScreen extends StatelessWidget {
+  final Game game;
+
+  const StageA(this.game, {super.key});
+  
+  @override
+  Widget build(BuildContext context) {
+    game.players.
+  }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 class GameLoungeScreen extends StatefulWidget {
   @override
@@ -12,7 +38,7 @@ class GameLoungeScreen extends StatefulWidget {
 
 class _GameLoungeScreenState extends State<GameLoungeScreen> {
   bool _isLoading = true;
-  Map<String, dynamic>? _gameDetails;
+  Game? _game;
 
   // URL pour les requêtes au backend
   final String _gameUrl = 'https://192.168.1.170:8543/game';
@@ -29,28 +55,19 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
     });
 
     try {
-      // Envoyer une requête GET à /game pour obtenir les détails de la partie actuelle
-      final response = await http.get(
-        Uri.parse(_gameUrl),
-        headers: {'Content-Type': 'application/json'},
-      );
+      final response = await http.get(Uri.parse(_gameUrl));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          _gameDetails = data;
+          _game = Game.fromJson(data);
           _isLoading = false;
         });
 
         // Vérifier si le jeu a démarré
-        if (_gameDetails!['started'] == true) {
+        if (_game!.started) {
           // Naviguer vers l'écran du quiz en passant le code de jeu
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    QuizScreen(gameCode: _gameDetails!['code'].toString())),
-          );
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => QuizScreen(game: _game!)));
         }
       } else if (response.statusCode == 404) {
         // Partie non trouvée

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'game_lounge_screen.dart'; // Importez l'écran du salon de jeu
+import '../stage/game_lounge_stage.dart'; // Importez l'écran du salon de jeu
 
 class JoinGameScreen extends StatefulWidget {
   @override

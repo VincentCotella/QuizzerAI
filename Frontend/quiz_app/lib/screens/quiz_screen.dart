@@ -1,9 +1,11 @@
 // lib/screens/quiz_screen.dart
 import 'package:flutter/material.dart';
 import 'package:quiz_app/dto/game.dart';
+import 'package:quiz_app/stage/game_lounge_stage.dart';
 import 'package:websocket_universal/websocket_universal.dart';
 import 'dart:convert';
 
+// ignore: must_be_immutable
 class QuizScreen extends StatefulWidget {
   Game game;
 
@@ -54,7 +56,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
     }
     else if (state == "WAITING FOR PLAYER") {
-
+      
     }
     else if (state == "STARTING") {
 

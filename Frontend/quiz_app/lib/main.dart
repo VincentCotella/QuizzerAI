@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/create_game_screen.dart';
 import 'screens/join_game_screen.dart';
-import 'screens/game_lounge_screen.dart';
-import 'screens/results_screen.dart';
+import 'stage/game_lounge_stage.dart';
+import 'stage/results_stage.dart';
 
 void main() {
   runApp(MyApp());
