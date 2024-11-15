@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @AllArgsConstructor
@@ -22,13 +23,15 @@ public class GameplayService {
             throw new IllegalStateException("Game is already started");
         }
 
-        game.setStarted(true);
-        game.setState(GameState.STARTING);
-        game.setCountdown(6);
+        CompletableFuture.runAsync(() -> {
+            game.setStarted(true);
+            game.setState(GameState.STARTING);
+            game.setCountdown(6);
 
-        while (!game.isFinished()) {
-            loop(game);
-        }
+            while (!game.isFinished()) {
+                loop(game);
+            }
+        });
     }
 
     @SneakyThrows
