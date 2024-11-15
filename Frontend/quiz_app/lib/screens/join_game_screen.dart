@@ -2,9 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:quiz_app/dto/game.dart';
 import 'dart:convert';
 
-import '../stage/game_lounge_stage.dart'; // Importez l'écran du salon de jeu
+import 'package:quiz_app/screens/quiz_screen.dart';
 
 class JoinGameScreen extends StatefulWidget {
   @override
@@ -34,10 +35,11 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
         );
 
         if (response.statusCode == 200) {
+          var game = Game.fromJson(jsonDecode(response.body));
           // Naviguer vers le salon de jeu
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => GameLoungeScreen()),
+            MaterialPageRoute(builder: (context) => QuizScreen(game: game)),
             (Route<dynamic> route) => false,
           );
         } else if (response.statusCode == 400) {

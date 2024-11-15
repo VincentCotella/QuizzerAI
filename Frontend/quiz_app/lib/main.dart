@@ -1,9 +1,9 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:quiz_app/screens/quiz_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/create_game_screen.dart';
 import 'screens/join_game_screen.dart';
-import 'stage/game_lounge_stage.dart';
 import 'stage/results_stage.dart';
 
 void main() {
@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => HomeScreen(),
         '/create_game': (context) => CreateGameScreen(),
         '/join_game': (context) => JoinGameScreen(),
-        '/game_lounge': (context) => GameLoungeScreen(),
+        '/game': (context) => Container(),
         '/results': (context) => ResultsScreen(),
       },
       debugShowCheckedModeBanner: false,

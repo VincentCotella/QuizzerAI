@@ -2,9 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:quiz_app/dto/game.dart';
 import 'dart:convert';
 
-import '../stage/game_lounge_stage.dart'; // Importez l'écran du salon de jeu
+import 'package:quiz_app/dto/player.dart';
+import 'package:quiz_app/screens/join_game_screen.dart';
+import 'package:quiz_app/screens/quiz_screen.dart';
 
 enum Difficulty {
   BEGINNER("Débutant"),
@@ -25,8 +28,12 @@ class ThemeOption {
 }
 
 class CreateGameScreen extends StatefulWidget {
+  final Player player;
+
+  const CreateGameScreen(this.player, {super.key});
+
   @override
-  _CreateGameScreenState createState() => _CreateGameScreenState();
+  State<CreateGameScreen> createState() => _CreateGameScreenState();
 }
 
 class _CreateGameScreenState extends State<CreateGameScreen> {
@@ -61,46 +68,11 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     _selectedNumberOfQuestions = _numberOfQuestionsOptions[1]; // Sélection par défaut (10)
   }
 
-  Future<bool> _isPlayerInGame() async {
-    final url = 'https://192.168.1.170:8543/player';
-    try {
-      final response = await http.get(Uri.parse(url), headers: {
-        'Content-Type': 'application/json',
-      });
-
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-        return data['inGame'] == true;
-      } else {
-        // Gérer les autres codes de statut si nécessaire
-        return false;
-      }
-    } catch (e) {
-      // Gestion des erreurs de connexion
-      print('Erreur lors de la vérification de l\'état du joueur : $e');
-      return false;
-    }
-  }
-
   Future<void> _createGame() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
-      });
-
-      // Vérifier si le joueur est déjà dans une partie
-      bool inGame = await _isPlayerInGame();
-      if (inGame) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Vous êtes déjà dans une partie. Veuillez la quitter avant d\'en créer une nouvelle.')),
-        );
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
+      });      
 
       // Déterminer le thème
       String theme = _selectedTheme == 'Autre' ? _customTheme : _selectedTheme!;
@@ -119,16 +91,14 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
       });
 
       try {
-        final response = await http.post(
-          url,
-          headers: {'Content-Type': 'application/json'},
-        );
+        final response = await http.post(url);
 
         if (response.statusCode == 200) {
+          var game = Game.fromJson(jsonDecode(response.body));
           // Naviguer vers le salon de jeu
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => GameLoungeScreen()),
+            MaterialPageRoute(builder: (context) => QuizScreen(game: game)),
             (Route<dynamic> route) => route.isFirst,
           );
         } else if (response.statusCode == 400) {
