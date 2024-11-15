@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class GameController {
     private final GameService gameService;
+    private final GameplayService gameplayService;
 
     @PostMapping
     public Game createGame(
@@ -37,5 +38,15 @@ public class GameController {
             throw new IllegalStateException("You are not in a game");
         }
         return player.getCurrentGame();
+    }
+
+    @PostMapping("/start")
+    public void startGame(Player player) {
+        gameService.startGame(player);
+    }
+
+    @PostMapping("/answer")
+    public void answerQuestion(Player player, @RequestParam(name = "choice") int choice) {
+        gameplayService.answer(player, choice);
     }
 }

@@ -20,6 +20,7 @@ public class GameService {
     private final Map<Integer, Game> games = new HashMap<>();
     private final GameNotifier notifier;
     private final QuestionGeneratorService questionGenerator;
+    private final GameplayService gameplay;
 
     private int generateCode() {
         if (games.size() >= 1_000_000) {
@@ -41,7 +42,7 @@ public class GameService {
         }
 
         var code = generateCode();
-        var game = new Game(code, count, theme, difficulty);
+        var game = new Game(code, count, theme, difficulty, player);
 
         CompletableFuture.runAsync(() -> {
             try {
@@ -50,6 +51,7 @@ public class GameService {
                 log.info("Questions generated");
             } finally {
                 game.setGenerating(false);
+                game.setState(GameState.WAITING_FOR_PLAYER);
                 notifier.notifyAllListener(game);
             }
         });
@@ -88,5 +90,19 @@ public class GameService {
             player.setCurrentGame(null);
             notifier.notifyAllListener(game);
         }
+    }
+
+    public void startGame(Player player) {
+        if (!player.isInGame()) {
+            throw new IllegalStateException("You are not in a game");
+        }
+
+        var game = player.getCurrentGame();
+
+        if (game.getOwner() != player) {
+            throw new IllegalStateException("You are not the owner of this game");
+        }
+
+        gameplay.start(game);
     }
 }

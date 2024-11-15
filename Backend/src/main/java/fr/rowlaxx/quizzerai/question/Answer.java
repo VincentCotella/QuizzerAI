@@ -8,8 +8,8 @@ import java.time.Duration;
 @Data
 public class Answer {
 
-    private Player player;
     private int choice;
+    private int point;
     private Duration duration;
 
 }
