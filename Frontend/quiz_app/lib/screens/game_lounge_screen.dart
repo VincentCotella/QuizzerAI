@@ -3,9 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import 'quiz_screen.dart'; // Assurez-vous que cette importation est présente
-import 'home_screen.dart'; // Si vous en avez besoin pour la navigation
+import 'quiz_screen.dart';
 
 class GameLoungeScreen extends StatefulWidget {
   @override
@@ -46,42 +44,24 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
 
         // Vérifier si le jeu a démarré
         if (_gameDetails!['started'] == true) {
-          // Naviguer vers l'écran du quiz
+          // Naviguer vers l'écran du quiz en passant le code de jeu
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => QuizScreen()),
+            MaterialPageRoute(
+                builder: (context) =>
+                    QuizScreen(gameCode: _gameDetails!['code'].toString())),
           );
         }
       } else if (response.statusCode == 404) {
         // Partie non trouvée
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Partie non trouvée.')),
-        );
-        Navigator.pop(context); // Retourner à l'écran précédent
+        _handleError('Partie non trouvée.');
       } else {
         // Afficher une erreur
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Erreur lors de la récupération des détails de la partie. Code: ${response.statusCode}')),
-        );
+        _handleError(
+            'Erreur lors de la récupération des détails de la partie. Code: ${response.statusCode}');
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      print('Exception attrapée : $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text('Erreur de connexion. Veuillez vérifier votre connexion.')),
-      );
+      _handleError('Erreur de connexion. Veuillez vérifier votre connexion.');
     }
   }
 
@@ -99,32 +79,20 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
       );
 
       if (response.statusCode == 200) {
-        // Naviguer vers l'écran du quiz
+        // Naviguer vers l'écran du quiz en passant le code de jeu
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => QuizScreen()),
+          MaterialPageRoute(
+              builder: (context) =>
+                  QuizScreen(gameCode: _gameDetails!['code'].toString())),
         );
       } else {
-        // Gérer les erreurs
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Erreur lors du démarrage du jeu. Code: ${response.statusCode}')),
-        );
+        _handleError(
+            'Erreur lors du démarrage du jeu. Code: ${response.statusCode}');
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      print('Exception attrapée : $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text('Erreur de connexion. Veuillez vérifier votre connexion.')),
-      );
+      _handleError(
+          'Erreur de connexion. Veuillez vérifier votre connexion.');
     }
   }
 
@@ -134,7 +102,6 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
     });
 
     try {
-      // Envoyer une requête DELETE à /game pour quitter la partie
       final response = await http.delete(
         Uri.parse(_gameUrl),
         headers: {'Content-Type': 'application/json'},
@@ -144,32 +111,27 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Vous avez quitté la partie.')),
         );
-        // Naviguer vers l'écran d'accueil
         Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       } else if (response.statusCode == 400) {
         final data = json.decode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  data['message'] ?? 'Erreur lors de la suppression de la partie.')),
-        );
+        _handleError(data['message'] ??
+            'Erreur lors de la suppression de la partie.');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Erreur lors de la suppression de la partie. Code: ${response.statusCode}')),
-        );
+        _handleError(
+            'Erreur lors de la suppression de la partie. Code: ${response.statusCode}');
       }
     } catch (e) {
-      print('Exception attrapée : $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de connexion. Veuillez réessayer.')),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      _handleError('Erreur de connexion. Veuillez réessayer.');
     }
+  }
+
+  void _handleError(String message) {
+    setState(() {
+      _isLoading = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   Widget _buildPlayerList(List<dynamic> players) {
@@ -262,8 +224,9 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
                               ),
                               child: _isLoading
                                   ? CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white),
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(
+                                              Colors.white),
                                     )
                                   : Text(
                                       'Démarrer le Quiz',

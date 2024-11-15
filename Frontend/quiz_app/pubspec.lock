@@ -123,6 +123,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.9.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -336,6 +344,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  websocket_universal:
+    dependency: "direct main"
+    description:
+      name: websocket_universal
+      sha256: "8e50d8238a26147fed64512e7af200ef9ab73fab51ab56010f7a54f94a0bb480"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.5"
   xdg_directories:
     dependency: transitive
     description:

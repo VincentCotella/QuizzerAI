@@ -4,9 +4,7 @@ import 'screens/home_screen.dart';
 import 'screens/create_game_screen.dart';
 import 'screens/join_game_screen.dart';
 import 'screens/game_lounge_screen.dart';
-import 'screens/quiz_screen.dart';
 import 'screens/results_screen.dart';
-
 
 void main() {
   runApp(MyApp());
@@ -31,7 +29,6 @@ class MyApp extends StatelessWidget {
         textTheme: TextTheme(
           displayLarge: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
           bodyLarge: TextStyle(fontSize: 16.0),
-          // Ajoutez d'autres styles si nécessaire
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -50,7 +47,6 @@ class MyApp extends StatelessWidget {
         '/create_game': (context) => CreateGameScreen(),
         '/join_game': (context) => JoinGameScreen(),
         '/game_lounge': (context) => GameLoungeScreen(),
-        '/quiz': (context) => QuizScreen(),
         '/results': (context) => ResultsScreen(),
       },
       debugShowCheckedModeBanner: false,

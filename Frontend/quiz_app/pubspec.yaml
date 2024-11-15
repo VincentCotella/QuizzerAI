@@ -38,7 +38,7 @@ dependencies:
   http: ^1.2.2
   google_fonts: ^6.2.1
   animations: ^2.0.4
-
+  websocket_universal: ^1.2.5
 
 dev_dependencies:
   flutter_test:
