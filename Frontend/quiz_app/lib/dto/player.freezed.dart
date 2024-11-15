@@ -21,7 +21,8 @@ Player _$PlayerFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Player {
   String get uuid => throw _privateConstructorUsedError;
-  String get name => throw _privateConstructorUsedError;
+  String? get name => throw _privateConstructorUsedError;
+  bool get inGame => throw _privateConstructorUsedError;
 
   /// Serializes this Player to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -37,7 +38,7 @@ abstract class $PlayerCopyWith<$Res> {
   factory $PlayerCopyWith(Player value, $Res Function(Player) then) =
       _$PlayerCopyWithImpl<$Res, Player>;
   @useResult
-  $Res call({String uuid, String name});
+  $Res call({String uuid, String? name, bool inGame});
 }
 
 /// @nodoc
@@ -56,17 +57,22 @@ class _$PlayerCopyWithImpl<$Res, $Val extends Player>
   @override
   $Res call({
     Object? uuid = null,
-    Object? name = null,
+    Object? name = freezed,
+    Object? inGame = null,
   }) {
     return _then(_value.copyWith(
       uuid: null == uuid
           ? _value.uuid
           : uuid // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
+      name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
+      inGame: null == inGame
+          ? _value.inGame
+          : inGame // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -78,7 +84,7 @@ abstract class _$$PlayerImplCopyWith<$Res> implements $PlayerCopyWith<$Res> {
       __$$PlayerImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String uuid, String name});
+  $Res call({String uuid, String? name, bool inGame});
 }
 
 /// @nodoc
@@ -95,17 +101,22 @@ class __$$PlayerImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? uuid = null,
-    Object? name = null,
+    Object? name = freezed,
+    Object? inGame = null,
   }) {
     return _then(_$PlayerImpl(
       uuid: null == uuid
           ? _value.uuid
           : uuid // ignore: cast_nullable_to_non_nullable
               as String,
-      name: null == name
+      name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
+      inGame: null == inGame
+          ? _value.inGame
+          : inGame // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -113,7 +124,8 @@ class __$$PlayerImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$PlayerImpl implements _Player {
-  const _$PlayerImpl({required this.uuid, required this.name});
+  const _$PlayerImpl(
+      {required this.uuid, required this.name, required this.inGame});
 
   factory _$PlayerImpl.fromJson(Map<String, dynamic> json) =>
       _$$PlayerImplFromJson(json);
@@ -121,11 +133,13 @@ class _$PlayerImpl implements _Player {
   @override
   final String uuid;
   @override
-  final String name;
+  final String? name;
+  @override
+  final bool inGame;
 
   @override
   String toString() {
-    return 'Player(uuid: $uuid, name: $name)';
+    return 'Player(uuid: $uuid, name: $name, inGame: $inGame)';
   }
 
   @override
@@ -134,12 +148,13 @@ class _$PlayerImpl implements _Player {
         (other.runtimeType == runtimeType &&
             other is _$PlayerImpl &&
             (identical(other.uuid, uuid) || other.uuid == uuid) &&
-            (identical(other.name, name) || other.name == name));
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.inGame, inGame) || other.inGame == inGame));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, uuid, name);
+  int get hashCode => Object.hash(runtimeType, uuid, name, inGame);
 
   /// Create a copy of Player
   /// with the given fields replaced by the non-null parameter values.
@@ -159,14 +174,18 @@ class _$PlayerImpl implements _Player {
 
 abstract class _Player implements Player {
   const factory _Player(
-      {required final String uuid, required final String name}) = _$PlayerImpl;
+      {required final String uuid,
+      required final String? name,
+      required final bool inGame}) = _$PlayerImpl;
 
   factory _Player.fromJson(Map<String, dynamic> json) = _$PlayerImpl.fromJson;
 
   @override
   String get uuid;
   @override
-  String get name;
+  String? get name;
+  @override
+  bool get inGame;
 
   /// Create a copy of Player
   /// with the given fields replaced by the non-null parameter values.

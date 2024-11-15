@@ -9,7 +9,8 @@ class Player with _$Player {
 
   const factory Player({
     required String uuid,
-    required String name
+    required String? name,
+    required bool inGame,
   }) = _Player;
 
   factory Player.fromJson(Map<String, Object?> json) => _$PlayerFromJson(json);

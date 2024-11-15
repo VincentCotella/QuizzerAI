@@ -13,7 +13,7 @@ class StageLoungeScreen extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    game.players.
+    game.countdown
   }
 
 
