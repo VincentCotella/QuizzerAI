@@ -3,6 +3,7 @@ package fr.rowlaxx.quizzerai.question;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -16,5 +17,5 @@ public class Question {
     private double multiplicator;
     private int answer;
 
-    private Map<UUID, Answer> answers;
+    private final Map<UUID, Answer> answers = new HashMap<>();
 }

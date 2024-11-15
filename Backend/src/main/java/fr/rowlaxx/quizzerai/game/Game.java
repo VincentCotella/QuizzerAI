@@ -40,11 +40,15 @@ public class Game {
     }
 
     public Map<UUID, Integer> getPoints() {
-        return questions.stream().flatMap(e -> e.getAnswers().entrySet().stream())
+        var map = questions.stream().flatMap(e -> e.getAnswers().entrySet().stream())
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().getPoint(),
                         Integer::sum
                 ));
+
+        var tmap = new HashMap<>(map);
+        players.forEach(p -> tmap.putIfAbsent(p.getUuid(), 0));
+        return tmap;
     }
 }
