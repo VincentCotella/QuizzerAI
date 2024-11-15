@@ -7,6 +7,8 @@ import 'results_screen.dart';
 
 class QuizScreen extends StatefulWidget {
   final String gameCode;
+  Game game;
+
 
   QuizScreen({required this.gameCode});
 
@@ -28,56 +30,26 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Future<void> _connectToWebSocket() async {
     final wsUrl = 'wss://192.168.1.170:8543/game/live';
-    
-    _channel = IWebSocketHandler<String, String>.createClient(
-      wsUrl,
-      SocketSimpleTextProcessor(),
-    );
+    final textSocketHandler = IWebSocketHandler<String, String>.createClient(wsUrl, SocketSimpleTextProcessor());
 
-    // Connecter avec le header X-GameCode
-    await _channel.connect(headers: {'X-GameCode': widget.gameCode});
-
-    // Écouter les messages du serveur
-    _channel.incomingMessagesStream.listen((message) {
-      final data = json.decode(message);
-      if (data['finished'] == true) {
-        // Naviguer vers l'écran des résultats si le quiz est terminé
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ResultsScreen()),
-        );
-      } else {
-        setState(() {
-          _questionData = data;
-          _selectedOptionIndex = -1;
-        });
-      }
-    }, onError: (error) {
-      print('Erreur WebSocket : $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de connexion au serveur.')),
-      );
+    /// 2. Listen to webSocket messages:
+    textSocketHandler.incomingMessagesStream.listen((inMsg) {
+      print('> webSocket  got text message from server: "$inMsg"');
+      setState(() {
+        Widget.game = ....:
+      })
     });
+
+  
+  await textSocketHandler.connect(params: SocketOptionalParams(
+    headers: {
+     'X-GameCode': Widget.gameCode,
+    },
+  ));
   }
 
   void _submitAnswer() {
-    if (_selectedOptionIndex == -1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Veuillez sélectionner une réponse.')),
-      );
-      return;
-    }
-
-    setState(() {
-      _isSubmitting = true;
-    });
-
-    // Envoyer la réponse sélectionnée au serveur WebSocket
-    _channel.sendMessage(json.encode({'answer': _selectedOptionIndex}));
-
-    setState(() {
-      _isSubmitting = false;
-    });
+    // POST /game/answer?choice=$1
   }
 
   @override
@@ -88,6 +60,12 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (Widget.game.state == 'STARTING') {
+      return 
+    }
+    else (Widget.game.state == 'ANSWER') {
+      return 
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Quiz'),
