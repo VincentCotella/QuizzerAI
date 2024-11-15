@@ -123,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               }
                             : () {
-                                Navigator.pushNamed(context, '/create_game');
+                                Navigator.pushNamed(context, '/create_game', arguments: p);
                               },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(

@@ -6,8 +6,6 @@ import 'package:quiz_app/dto/game.dart';
 import 'dart:convert';
 
 import 'package:quiz_app/dto/player.dart';
-import 'package:quiz_app/screens/join_game_screen.dart';
-import 'package:quiz_app/screens/quiz_screen.dart';
 
 enum Difficulty {
   BEGINNER("Débutant"),
@@ -96,11 +94,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         if (response.statusCode == 200) {
           var game = Game.fromJson(jsonDecode(response.body));
           // Naviguer vers le salon de jeu
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => QuizScreen(game: game)),
-            (Route<dynamic> route) => route.isFirst,
-          );
+          Navigator.pushNamed(context, '/game', arguments: game);
         } else if (response.statusCode == 400) {
           // Supposons que le serveur retourne 400 avec un message spécifique
           final data = json.decode(response.body);
@@ -453,12 +447,12 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       ),
                       SizedBox(height: 16.0),
                       // Sélection du nombre de questions
-                      Text(
+                      const Text(
                         'Nombre de questions:',
                         style: TextStyle(
                             fontSize: 18.0, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 8.0),
                       SizedBox(
                         height: 120.0,
                         child: ListView.separated(
@@ -476,21 +470,21 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                           },
                         ),
                       ),
-                      SizedBox(height: 24.0),
+                      const SizedBox(height: 24.0),
                       // Bouton de création de partie
                       Center(
                         child: ElevatedButton(
                           onPressed: _createGame,
                           style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 horizontal: 40.0, vertical: 15.0),
-                            backgroundColor: Color(0xFFFFC107),
-                            foregroundColor: Color(0xFF6A1B9A),
+                            backgroundColor: const Color(0xFFFFC107),
+                            foregroundColor: const Color(0xFF6A1B9A),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                           ),
-                          child: Text(
+                          child: const Text(
                             'Créer Partie',
                             style: TextStyle(fontSize: 20.0),
                           ),

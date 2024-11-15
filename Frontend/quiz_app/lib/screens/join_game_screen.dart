@@ -5,8 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:quiz_app/dto/game.dart';
 import 'dart:convert';
 
-import 'package:quiz_app/screens/quiz_screen.dart';
-
 class JoinGameScreen extends StatefulWidget {
   @override
   _JoinGameScreenState createState() => _JoinGameScreenState();
@@ -37,11 +35,8 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
         if (response.statusCode == 200) {
           var game = Game.fromJson(jsonDecode(response.body));
           // Naviguer vers le salon de jeu
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => QuizScreen(game: game)),
-            (Route<dynamic> route) => false,
-          );
+          Navigator.pushNamed(context, '/game', arguments: game);
+
         } else if (response.statusCode == 400) {
           final data = json.decode(response.body);
           ScaffoldMessenger.of(context).showSnackBar(

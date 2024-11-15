@@ -1,5 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:quiz_app/dto/game.dart';
+import 'package:quiz_app/dto/player.dart';
 import 'package:quiz_app/screens/quiz_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/create_game_screen.dart';
@@ -44,9 +46,9 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
-        '/create_game': (context) => Container(),
+        '/create_game': (context) => CreateGameScreen(ModalRoute.of(context)!.settings.arguments as Player),
         '/join_game': (context) => JoinGameScreen(),
-        '/game': (context) => Container(),
+        '/game': (context) => QuizScreen(game: ModalRoute.of(context)!.settings.arguments as Game),
         '/results': (context) => ResultsScreen(),
       },
       debugShowCheckedModeBanner: false,
