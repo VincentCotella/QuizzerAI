@@ -31,7 +31,7 @@ mixin _$Game {
   List<Player> get players => throw _privateConstructorUsedError;
   List<Question> get questions => throw _privateConstructorUsedError;
   String get state => throw _privateConstructorUsedError;
-  DateTime get stateSince => throw _privateConstructorUsedError;
+  double get stateSince => throw _privateConstructorUsedError;
   int get currentQuestionIndex => throw _privateConstructorUsedError;
   int get countdown => throw _privateConstructorUsedError;
   Map<String, double> get points => throw _privateConstructorUsedError;
@@ -62,7 +62,7 @@ abstract class $GameCopyWith<$Res> {
       List<Player> players,
       List<Question> questions,
       String state,
-      DateTime stateSince,
+      double stateSince,
       int currentQuestionIndex,
       int countdown,
       Map<String, double> points});
@@ -149,7 +149,7 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
       stateSince: null == stateSince
           ? _value.stateSince
           : stateSince // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as double,
       currentQuestionIndex: null == currentQuestionIndex
           ? _value.currentQuestionIndex
           : currentQuestionIndex // ignore: cast_nullable_to_non_nullable
@@ -195,7 +195,7 @@ abstract class _$$GameImplCopyWith<$Res> implements $GameCopyWith<$Res> {
       List<Player> players,
       List<Question> questions,
       String state,
-      DateTime stateSince,
+      double stateSince,
       int currentQuestionIndex,
       int countdown,
       Map<String, double> points});
@@ -280,7 +280,7 @@ class __$$GameImplCopyWithImpl<$Res>
       stateSince: null == stateSince
           ? _value.stateSince
           : stateSince // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as double,
       currentQuestionIndex: null == currentQuestionIndex
           ? _value.currentQuestionIndex
           : currentQuestionIndex // ignore: cast_nullable_to_non_nullable
@@ -358,7 +358,7 @@ class _$GameImpl implements _Game {
   @override
   final String state;
   @override
-  final DateTime stateSince;
+  final double stateSince;
   @override
   final int currentQuestionIndex;
   @override
@@ -454,7 +454,7 @@ abstract class _Game implements Game {
       required final List<Player> players,
       required final List<Question> questions,
       required final String state,
-      required final DateTime stateSince,
+      required final double stateSince,
       required final int currentQuestionIndex,
       required final int countdown,
       required final Map<String, double> points}) = _$GameImpl;
@@ -484,7 +484,7 @@ abstract class _Game implements Game {
   @override
   String get state;
   @override
-  DateTime get stateSince;
+  double get stateSince;
   @override
   int get currentQuestionIndex;
   @override

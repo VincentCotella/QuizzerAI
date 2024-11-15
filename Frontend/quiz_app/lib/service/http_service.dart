@@ -6,7 +6,9 @@ import 'package:quiz_app/dto/game.dart';
 import 'package:quiz_app/dto/player.dart';
 import 'package:http/http.dart' as http;
 
+//const String baseUrl = "projet1-441715.appspot.com";
 const String baseUrl = "127.0.0.1:8543";
+
 
 Future<Player> fetchPlayer() {
   return http.get(Uri.parse("https://$baseUrl/player"))
@@ -45,7 +47,8 @@ Future<Game> joinGame(int gameCode) {
 }
 
 Future<Game> createGame(Difficulty difficulty, String theme, int count) {
-  return http.post(Uri.parse("https://$baseUrl/game?difficulty=${difficulty.label}&theme=$theme&count=$count"))
+  return http.post(Uri.parse("https://$baseUrl/game?difficulty=${difficulty.name}&theme=$theme&count=$count"))
       .then((resp) => jsonDecode(resp.body))
       .then((json) => Game.fromJson(json));
+      
 }

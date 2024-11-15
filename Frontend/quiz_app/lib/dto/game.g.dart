@@ -22,7 +22,7 @@ _$GameImpl _$$GameImplFromJson(Map<String, dynamic> json) => _$GameImpl(
           .map((e) => Question.fromJson(e as Map<String, dynamic>))
           .toList(),
       state: json['state'] as String,
-      stateSince: DateTime.parse(json['stateSince'] as String),
+      stateSince: (json['stateSince'] as num).toDouble(),
       currentQuestionIndex: (json['currentQuestionIndex'] as num).toInt(),
       countdown: (json['countdown'] as num).toInt(),
       points: (json['points'] as Map<String, dynamic>).map(
@@ -43,7 +43,7 @@ Map<String, dynamic> _$$GameImplToJson(_$GameImpl instance) =>
       'players': instance.players,
       'questions': instance.questions,
       'state': instance.state,
-      'stateSince': instance.stateSince.toIso8601String(),
+      'stateSince': instance.stateSince,
       'currentQuestionIndex': instance.currentQuestionIndex,
       'countdown': instance.countdown,
       'points': instance.points,

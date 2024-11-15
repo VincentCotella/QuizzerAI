@@ -51,13 +51,12 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     String theme = _selectedTheme == 'Autre' ? _customTheme : _selectedTheme!;
     Difficulty difficulty = difficultyFromString(_selectedDifficulty!.name);
     int numberOfQuestions = _selectedNumberOfQuestions!;
-
-
+    
     http_service.createGame(difficulty, theme, numberOfQuestions)
       .then((game) => goToGame(context, game))
-      .catchError((error) => showDialog(
+      .catchError((error, stack) => showDialog(
         context: context, 
-        builder: (context) => const Text("Unable to create a game"),
+        builder: (context) => Text("Unable to create a game : ${error.toString()}"),
       ));
   }
 

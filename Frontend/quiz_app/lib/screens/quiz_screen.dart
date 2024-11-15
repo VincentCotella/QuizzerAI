@@ -25,7 +25,7 @@ class _QuizScreenState extends State<QuizScreen> {
   late IWebSocketHandler<String, String> _channel;
 
   @override
-  Future<void> initState() async {
+  void initState() {
     super.initState();
 
     _channel = ws_service.listenGame(widget.game.code, (game) => setState(() {
@@ -46,7 +46,7 @@ class _QuizScreenState extends State<QuizScreen> {
     if (state == "GENERATING") {
       return GeneratingStage(game: widget.game);
     }
-    else if (state == "WAITING FOR PLAYER") {
+    else if (state == "WAITING_FOR_PLAYER") {
       return WaitingForPlayerStage(game: widget.game);
     }
     else if (state == "STARTING") {

@@ -20,7 +20,7 @@ class Game with _$Game {
     required List<Player> players,
     required List<Question> questions,
     required String state,
-    required DateTime stateSince,
+    required double stateSince,
     required int currentQuestionIndex,
     required int countdown,
     required Map<String, double> points
