@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class GameLoungeScreen extends StatefulWidget {
-  GameLoungeScreen();
+import 'quiz_screen.dart'; // Assurez-vous que cette importation est présente
+import 'home_screen.dart'; // Si vous en avez besoin pour la navigation
 
+class GameLoungeScreen extends StatefulWidget {
   @override
   _GameLoungeScreenState createState() => _GameLoungeScreenState();
 }
@@ -42,6 +43,15 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
           _gameDetails = data;
           _isLoading = false;
         });
+
+        // Vérifier si le jeu a démarré
+        if (_gameDetails!['started'] == true) {
+          // Naviguer vers l'écran du quiz
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => QuizScreen()),
+          );
+        }
       } else if (response.statusCode == 404) {
         // Partie non trouvée
         setState(() {
@@ -68,7 +78,52 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
       });
       print('Exception attrapée : $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de connexion. Veuillez réessayer.')),
+        SnackBar(
+            content:
+                Text('Erreur de connexion. Veuillez vérifier votre connexion.')),
+      );
+    }
+  }
+
+  Future<void> _startGame() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final String _startGameUrl = 'https://192.168.1.170:8543/game/start';
+
+    try {
+      final response = await http.post(
+        Uri.parse(_startGameUrl),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        // Naviguer vers l'écran du quiz
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => QuizScreen()),
+        );
+      } else {
+        // Gérer les erreurs
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Erreur lors du démarrage du jeu. Code: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Exception attrapée : $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Erreur de connexion. Veuillez vérifier votre connexion.')),
       );
     }
   }
@@ -151,71 +206,73 @@ class _GameLoungeScreenState extends State<GameLoungeScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: RefreshIndicator(
+        onRefresh: _fetchGameDetails,
         child: _isLoading
             ? Center(child: CircularProgressIndicator())
             : _gameDetails == null
                 ? Center(child: Text('Aucune donnée disponible.'))
                 : SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Code PIN: ${_gameDetails!['code']}',
-                          style: TextStyle(
-                              fontSize: 20.0, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 16.0),
-                        Text(
-                          'Thème: ${_gameDetails!['theme']}',
-                          style: TextStyle(fontSize: 18.0),
-                        ),
-                        SizedBox(height: 8.0),
-                        Text(
-                          'Difficulté: ${_gameDetails!['difficulty']}',
-                          style: TextStyle(fontSize: 18.0),
-                        ),
-                        SizedBox(height: 8.0),
-                        Text(
-                          'Nombre de Questions: ${_gameDetails!['count']}',
-                          style: TextStyle(fontSize: 18.0),
-                        ),
-                        SizedBox(height: 24.0),
-                        Text(
-                          'Joueurs Connectés:',
-                          style: TextStyle(
-                              fontSize: 18.0, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 8.0),
-                        _buildPlayerList(_gameDetails!['players']),
-                        SizedBox(height: 24.0),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Logique pour démarrer le quiz si vous êtes le maître du jeu
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Fonctionnalité de démarrage du quiz à implémenter.')),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 40.0, vertical: 15.0),
-                              backgroundColor: Color(0xFF6A1B9A),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0),
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Code PIN: ${_gameDetails!['code']}',
+                            style: TextStyle(
+                                fontSize: 20.0, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 16.0),
+                          Text(
+                            'Thème: ${_gameDetails!['theme']}',
+                            style: TextStyle(fontSize: 18.0),
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            'Difficulté: ${_gameDetails!['difficulty']}',
+                            style: TextStyle(fontSize: 18.0),
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            'Nombre de Questions: ${_gameDetails!['count']}',
+                            style: TextStyle(fontSize: 18.0),
+                          ),
+                          SizedBox(height: 24.0),
+                          Text(
+                            'Joueurs Connectés:',
+                            style: TextStyle(
+                                fontSize: 18.0, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8.0),
+                          _buildPlayerList(_gameDetails!['players']),
+                          SizedBox(height: 24.0),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _startGame,
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 40.0, vertical: 15.0),
+                                backgroundColor: Color(0xFF6A1B9A),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              'Démarrer le Quiz',
-                              style: TextStyle(fontSize: 20.0),
+                              child: _isLoading
+                                  ? CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    )
+                                  : Text(
+                                      'Démarrer le Quiz',
+                                      style: TextStyle(fontSize: 20.0),
+                                    ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
       ),

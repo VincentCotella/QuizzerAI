@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/create_game_screen.dart';
 import 'screens/join_game_screen.dart';
+import 'screens/game_lounge_screen.dart';
+import 'screens/quiz_screen.dart';
+import 'screens/results_screen.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -45,7 +49,9 @@ class MyApp extends StatelessWidget {
         '/': (context) => HomeScreen(),
         '/create_game': (context) => CreateGameScreen(),
         '/join_game': (context) => JoinGameScreen(),
-        // La route vers GameLoungeScreen nécessite un paramètre dynamique, elle sera gérée via Navigator
+        '/game_lounge': (context) => GameLoungeScreen(),
+        '/quiz': (context) => QuizScreen(),
+        '/results': (context) => ResultsScreen(),
       },
       debugShowCheckedModeBanner: false,
     );
