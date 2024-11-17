@@ -75,6 +75,10 @@ public class GameplayService {
         game.setState(state);
         game.setCountdown(countdown);
         notifier.notifyAllListener(game);
+
+        if (game.isFinished()) {
+            notifier.closeAllListener(game.getCode());
+        }
     }
 
     public void answer(Player player, int choice) {

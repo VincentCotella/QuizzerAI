@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/game")
 @AllArgsConstructor
+@CrossOrigin
 public class GameController {
     private final GameService gameService;
     private final GameplayService gameplayService;

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:quiz_app/dto/game.dart';
 import 'package:quiz_app/stage/answer_stage.dart';
@@ -9,6 +7,7 @@ import 'package:quiz_app/stage/point_stage.dart';
 import 'package:quiz_app/stage/question_stage.dart';
 import 'package:quiz_app/stage/starting_stage.dart';
 import 'package:quiz_app/stage/waiting_for_player_stage.dart';
+import 'package:web_socket_client/web_socket_client.dart';
 
 import 'package:quiz_app/service/ws_service.dart' as ws_service;
 
@@ -23,20 +22,20 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  late Future<WebSocket> _channel;
+  late WebSocket _socket;
 
   @override
   void initState() {
     super.initState();
 
-    _channel = ws_service.listenGame(widget.game.code, (game) => setState(() {
+    _socket = ws_service.listenGame(widget.game.code, (game) => setState(() {
       widget.game = game;
     }));
   }
 
   @override
   void dispose() {
-    _channel.then((socket) => socket.close());
+    _socket.close();
     super.dispose();
   }
 
