@@ -1,5 +1,3 @@
-// lib/screens/create_game_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:quiz_app/dto/difficulty.dart';
 import 'package:quiz_app/dto/player.dart';
@@ -42,29 +40,62 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   // Liste des options pour le nombre de questions
   final List<int> _numberOfQuestionsOptions = [5, 10, 15, 20, 25];
 
+  // ScrollControllers pour les sections horizontales
+  late ScrollController _themeScrollController;
+  late ScrollController _difficultyScrollController;
+  late ScrollController _questionsScrollController;
+
   @override
   void initState() {
     super.initState();
     _selectedTheme = _themes[0].name; // Sélection par défaut
     _selectedDifficulty = Difficulty.EASY; // Sélection par défaut
     _selectedNumberOfQuestions = _numberOfQuestionsOptions[1]; // Sélection par défaut (10)
+
+    // Initialisation des ScrollControllers
+    _themeScrollController = ScrollController();
+    _difficultyScrollController = ScrollController();
+    _questionsScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    // Libération des ScrollControllers
+    _themeScrollController.dispose();
+    _difficultyScrollController.dispose();
+    _questionsScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _createGame() async {
-    String theme = _selectedTheme == 'Autre' ? _customTheme : _selectedTheme!;
-    Difficulty difficulty = difficultyFromString(_selectedDifficulty!.name);
-    int numberOfQuestions = _selectedNumberOfQuestions!;
-    
-    http_service.createGame(difficulty, theme, numberOfQuestions)
-      .then((game) => goToGame(context, game, widget.player))
-      .catchError((error, stack) => showDialog(
-        context: context, 
-        builder: (context) => Text("Unable to create a game : ${error.toString()}"),
-      ));
+    if (_formKey.currentState?.validate() ?? false) {
+      String theme = _selectedTheme == 'Autre' ? _customTheme : _selectedTheme!;
+      Difficulty difficulty = difficultyFromString(_selectedDifficulty!.name);
+      int numberOfQuestions = _selectedNumberOfQuestions!;
+
+      try {
+        final game = await http_service.createGame(difficulty, theme, numberOfQuestions);
+        goToGame(context, game, widget.player);
+      } catch (error) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Erreur"),
+            content: Text("Impossible de créer une partie : ${error.toString()}"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   // Méthode pour construire les options de thème
-  Widget _buildThemeOption(ThemeOption themeOption) {
+  Widget _buildThemeOption(ThemeOption themeOption, double itemWidth) {
     bool isSelected = _selectedTheme == themeOption.name;
     bool isOther = themeOption.name == 'Autre';
     return Material(
@@ -77,6 +108,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         },
         borderRadius: BorderRadius.circular(12.0),
         child: Container(
+          width: itemWidth,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
             color: isSelected
@@ -127,10 +159,10 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   }
 
   // Méthode pour construire les options de difficulté
-  Widget _buildDifficultyOption(Difficulty difficulty) {
+  Widget _buildDifficultyOption(Difficulty difficulty, double itemWidth) {
     bool isSelected = _selectedDifficulty == difficulty;
     int starCount = difficulty.index + 1;
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -141,6 +173,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         },
         borderRadius: BorderRadius.circular(12.0),
         child: Container(
+          width: itemWidth,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFFBA68C8) : Colors.white,
@@ -189,7 +222,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   }
 
   // Méthode pour construire les options du nombre de questions
-  Widget _buildNumberOfQuestionsOption(int number) {
+  Widget _buildNumberOfQuestionsOption(int number, double itemWidth) {
     bool isSelected = _selectedNumberOfQuestions == number;
     return Material(
       color: Colors.transparent,
@@ -201,6 +234,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         },
         borderRadius: BorderRadius.circular(12.0),
         child: Container(
+          width: itemWidth,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFFBA68C8) : Colors.white,
@@ -249,7 +283,10 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   // Méthode pour calculer la largeur des éléments
   double _calculateItemWidth(
       double screenWidth, int itemsPerScreen, double padding) {
-    return (screenWidth - (padding * (itemsPerScreen + 1))) / itemsPerScreen;
+    // Calculer la largeur totale disponible en soustrayant les paddings
+    double totalPadding = padding * (itemsPerScreen + 1);
+    double availableWidth = screenWidth - totalPadding;
+    return availableWidth / itemsPerScreen;
   }
 
   @override
@@ -279,138 +316,152 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-                key: _formKey, // Clé du formulaire
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Sélection du thème
-                      const Text(
-                        'Choisissez un thème:',
-                        style: TextStyle(
-                            fontSize: 18.0, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8.0),
-                      SizedBox(
-                        height: 120.0,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.symmetric(horizontal: padding),
-                          itemCount: _themes.length,
-                          separatorBuilder: (context, index) =>
-                              SizedBox(width: padding),
-                          itemBuilder: (context, index) {
-                            return SizedBox(
-                              width: themeItemWidth,
-                              child: _buildThemeOption(_themes[index]),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      // Champ de thème personnalisé
-                      if (_selectedTheme == 'Autre') ...[
-                        const Text(
-                          'Entrez votre thème:',
-                          style: TextStyle(
-                              fontSize: 18.0, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 8.0),
-                        TextFormField(
-                          onChanged: (value) {
-                            setState(() {
-                              _customTheme = value;
-                            });
-                          },
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Votre thème',
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12.0, vertical: 8.0),
-                          ),
-                          validator: (value) {
-                            if (_selectedTheme == 'Autre' &&
-                                (value == null || value.isEmpty)) {
-                              return 'Veuillez entrer un thème';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16.0),
-                      ],
-                      // Sélection de la difficulté
-                      const Text(
-                        'Sélectionnez la difficulté:',
-                        style: TextStyle(
-                            fontSize: 18.0, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8.0),
-                      SizedBox(
-                        height: 120.0,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.symmetric(horizontal: padding),
-                          itemCount: Difficulty.values.length,
-                          separatorBuilder: (context, index) =>
-                              SizedBox(width: padding),
-                          itemBuilder: (context, index) {
-                            return SizedBox(
-                              width: difficultyItemWidth,
-                              child:
-                                  _buildDifficultyOption(Difficulty.values[index]),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      // Sélection du nombre de questions
-                      const Text(
-                        'Nombre de questions:',
-                        style: TextStyle(
-                            fontSize: 18.0, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8.0),
-                      SizedBox(
-                        height: 120.0,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.symmetric(horizontal: padding),
-                          itemCount: _numberOfQuestionsOptions.length,
-                          separatorBuilder: (context, index) =>
-                              SizedBox(width: padding),
-                          itemBuilder: (context, index) {
-                            return SizedBox(
-                              width: questionsItemWidth,
-                              child: _buildNumberOfQuestionsOption(
-                                  _numberOfQuestionsOptions[index]),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 24.0),
-                      // Bouton de création de partie
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: _createGame,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 40.0, vertical: 15.0),
-                            backgroundColor: const Color(0xFFFFC107),
-                            foregroundColor: const Color(0xFF6A1B9A),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                          ),
-                          child: const Text(
-                            'Créer Partie',
-                            style: TextStyle(fontSize: 20.0),
-                          ),
-                        ),
-                      ),
-                    ],
+          key: _formKey, // Clé du formulaire
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Sélection du thème
+                const Text(
+                  'Choisissez un thème:',
+                  style: TextStyle(
+                      fontSize: 18.0, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8.0),
+                SizedBox(
+                  height: 120.0,
+                  child: Scrollbar(
+                    controller: _themeScrollController,
+                    thumbVisibility: true, // Affiche toujours la barre de défilement
+                    child: ListView.separated(
+                      controller: _themeScrollController,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(horizontal: padding),
+                      itemCount: _themes.length,
+                      separatorBuilder: (context, index) =>
+                          SizedBox(width: padding),
+                      itemBuilder: (context, index) {
+                        return SizedBox(
+                          width: themeItemWidth,
+                          child: _buildThemeOption(_themes[index], themeItemWidth),
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 16.0),
+                // Champ de thème personnalisé
+                if (_selectedTheme == 'Autre') ...[
+                  const Text(
+                    'Entrez votre thème:',
+                    style: TextStyle(
+                        fontSize: 18.0, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8.0),
+                  TextFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        _customTheme = value;
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Votre thème',
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 8.0),
+                    ),
+                    validator: (value) {
+                      if (_selectedTheme == 'Autre' &&
+                          (value == null || value.isEmpty)) {
+                        return 'Veuillez entrer un thème';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                ],
+                // Sélection de la difficulté
+                const Text(
+                  'Sélectionnez la difficulté:',
+                  style: TextStyle(
+                      fontSize: 18.0, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8.0),
+                SizedBox(
+                  height: 120.0,
+                  child: Scrollbar(
+                    controller: _difficultyScrollController,
+                    thumbVisibility: true,
+                    child: ListView.separated(
+                      controller: _difficultyScrollController,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(horizontal: padding),
+                      itemCount: Difficulty.values.length,
+                      separatorBuilder: (context, index) =>
+                          SizedBox(width: padding),
+                      itemBuilder: (context, index) {
+                        return SizedBox(
+                          width: difficultyItemWidth,
+                          child: _buildDifficultyOption(Difficulty.values[index], difficultyItemWidth),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                // Sélection du nombre de questions
+                const Text(
+                  'Nombre de questions:',
+                  style: TextStyle(
+                      fontSize: 18.0, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8.0),
+                SizedBox(
+                  height: 120.0,
+                  child: Scrollbar(
+                    controller: _questionsScrollController,
+                    thumbVisibility: true,
+                    child: ListView.separated(
+                      controller: _questionsScrollController,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(horizontal: padding),
+                      itemCount: _numberOfQuestionsOptions.length,
+                      separatorBuilder: (context, index) =>
+                          SizedBox(width: padding),
+                      itemBuilder: (context, index) {
+                        return SizedBox(
+                          width: questionsItemWidth,
+                          child: _buildNumberOfQuestionsOption(
+                              _numberOfQuestionsOptions[index], questionsItemWidth),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24.0),
+                // Bouton de création de partie
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _createGame,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 40.0, vertical: 15.0),
+                      backgroundColor: const Color(0xFFFFC107),
+                      foregroundColor: const Color(0xFF6A1B9A),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                    ),
+                    child: const Text(
+                      'Créer Partie',
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
