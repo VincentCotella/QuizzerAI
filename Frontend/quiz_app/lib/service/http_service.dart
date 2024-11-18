@@ -7,7 +7,7 @@ import 'package:quiz_app/dto/player.dart';
 import 'package:http/http.dart' as http;
 
 //const String baseUrl = "quizzerai-114409294332.us-central1.run.app"; /api
-const String baseUrl = "deploy-frontflutter-114409294332.us-central1.run.app/api";
+const String baseUrl = "quizzerai-114409294332.us-central1.run.app";
 // 127.0.0.1:8543
 
 Future<Player> fetchPlayer() {
