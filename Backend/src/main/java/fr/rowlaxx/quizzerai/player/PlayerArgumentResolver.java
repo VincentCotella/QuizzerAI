@@ -41,7 +41,6 @@ public class PlayerArgumentResolver implements HandlerMethodArgumentResolver {
             cookie.setMaxAge((int) Duration.ofDays(1).toSeconds());
             cookie.setPath("/");
             cookie.setAttribute("SameSite", "None");
-            cookie.setHttpOnly(true);
             cookie.setSecure(true);
 
             response.addCookie(cookie);
