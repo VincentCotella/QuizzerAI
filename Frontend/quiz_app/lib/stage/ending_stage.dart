@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/stage/abstract_stage.dart';
 
+import 'package:quiz_app/service/http_service.dart' as http_service;
+
 class EndingStage extends AbstractStage {
   const EndingStage(super.game, {super.key});
 
   @override
   Widget build(BuildContext context) {
     final sortedPlayers = game.points.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+      .map((e) => MapEntry(game.players.where((p) => p.uuid == e.key).first.name ?? 'Inconnu', e.value))
+      .toList();
+
+    sortedPlayers.sort((a, b) => b.value.compareTo(a.value));
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -25,7 +30,8 @@ class EndingStage extends AbstractStage {
           Center(
             child: ElevatedButton(
               onPressed: () {
-                // Retour à l'accueil
+                http_service.leaveGame();
+                Navigator.pushNamed(context, "/");
               },
               child: Text("Retour à l'accueil", style: TextStyle(fontSize: 18)),
               style: ElevatedButton.styleFrom(

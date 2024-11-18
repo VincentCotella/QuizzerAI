@@ -51,37 +51,32 @@ public class GameNotifier extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        log.info("Accepting websocket connection");
-        try {
-            var code = getCode(session);
-            sessions.computeIfAbsent(code, k -> new LinkedList<>()).add(session);
-        } catch (IllegalStateException e) {
-            session.close(CloseStatus.NOT_ACCEPTABLE);
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        if (session.getAttributes().containsKey("code")) {
+            session.close(CloseStatus.POLICY_VIOLATION);
         }
+
+        var code = Integer.parseInt(message.getPayload());
+        log.info("Listening for game {}", code);
+        sessions.computeIfAbsent(code, k -> new LinkedList<>()).add(session);
+        session.getAttributes().put("code", code);
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    public void afterConnectionEstablished(WebSocketSession session) {
+        log.info("Accepting websocket connection");
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         log.info("Dispatching websocket connection");
         try {
-            var code = getCode(session);
+            var code = (Integer) session.getAttributes().get("code");
             var list = sessions.get(code);
 
             if (list != null) {
                 list.remove(session);
             }
         } catch (IllegalStateException ignored) {}
-    }
-
-    private int getCode(WebSocketSession session) {
-        var headers = session.getHandshakeHeaders();
-
-        try {
-            var code = headers.get("X-GameCode").stream().findFirst();
-            return Integer.parseInt(code.orElseThrow());
-        } catch (NoSuchElementException | NumberFormatException | NullPointerException e) {
-            throw new IllegalStateException("X-GameCode must be present and valid");
-        }
     }
 }

@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
     player.then((value) {
       if (value.inGame) {
         http_service.fetchGame()
-          .then((game) => goToGame(context, game));
+          .then((game) => goToGame(context, game, value));
       }
       else if (value.name == null) {
         _showEditNameDialog();
@@ -64,13 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Suppression de l'AppBar pour un écran plein
-      body: Container(
+      body: Center(child: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF8E24AA), Color(0xFFBA68C8)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
           ),
         ),
         child: FutureBuilder(
@@ -80,11 +77,11 @@ class _HomeScreenState extends State<HomeScreen> {
               return const CircularProgressIndicator();
             }
             var p = snapshot.data! as Player;
-            return SingleChildScrollView(
-                  // Pour éviter les débordements sur petits écrans
-                  child: Column(
+            return Column(
+                    mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Row(children: [Expanded(child: Container())]),
                       const Icon(
                         Icons.quiz,
                         size: 100.0,
@@ -102,19 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 50.0),
                       ElevatedButton(
-                        onPressed: p.inGame
-                            ? () {
-                                // Afficher un message indiquant que le joueur est déjà dans une partie
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Vous êtes déjà dans une partie. Veuillez la quitter avant de créer une nouvelle partie.')),
-                                );
-                              }
-                            : () {
-
-                                Navigator.pushNamed(context, '/create_game', arguments: p);
-                              },
+                        onPressed: () => Navigator.pushNamed(context, '/create_game', arguments: p),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 40.0, vertical: 15.0),
@@ -131,18 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 20.0),
                       ElevatedButton(
-                        onPressed: p.inGame
-                            ? () {
-                                // Afficher un message indiquant que le joueur est déjà dans une partie
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Vous êtes déjà dans une partie. Veuillez la quitter avant de rejoindre une nouvelle partie.')),
-                                );
-                              }
-                            : () {
-                                Navigator.pushNamed(context, '/join_game');
-                              },
+                        onPressed: () => Navigator.pushNamed(context, '/join_game', arguments: p),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 40.0, vertical: 15.0),
@@ -166,11 +140,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ],
-                  ),
+                  
                 );
           },
         ),
       ),
-    );
+    ));
   }
 }

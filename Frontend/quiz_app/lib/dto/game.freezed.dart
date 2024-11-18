@@ -23,7 +23,7 @@ mixin _$Game {
   int get code => throw _privateConstructorUsedError;
   int get count => throw _privateConstructorUsedError;
   String get theme => throw _privateConstructorUsedError;
-  String get difficulty => throw _privateConstructorUsedError;
+  Difficulty get difficulty => throw _privateConstructorUsedError;
   Player get owner => throw _privateConstructorUsedError;
   bool get generating => throw _privateConstructorUsedError;
   bool get started => throw _privateConstructorUsedError;
@@ -31,7 +31,6 @@ mixin _$Game {
   List<Player> get players => throw _privateConstructorUsedError;
   List<Question> get questions => throw _privateConstructorUsedError;
   String get state => throw _privateConstructorUsedError;
-  double get stateSince => throw _privateConstructorUsedError;
   int get currentQuestionIndex => throw _privateConstructorUsedError;
   int get countdown => throw _privateConstructorUsedError;
   Map<String, double> get points => throw _privateConstructorUsedError;
@@ -54,7 +53,7 @@ abstract class $GameCopyWith<$Res> {
       {int code,
       int count,
       String theme,
-      String difficulty,
+      Difficulty difficulty,
       Player owner,
       bool generating,
       bool started,
@@ -62,7 +61,6 @@ abstract class $GameCopyWith<$Res> {
       List<Player> players,
       List<Question> questions,
       String state,
-      double stateSince,
       int currentQuestionIndex,
       int countdown,
       Map<String, double> points});
@@ -96,7 +94,6 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
     Object? players = null,
     Object? questions = null,
     Object? state = null,
-    Object? stateSince = null,
     Object? currentQuestionIndex = null,
     Object? countdown = null,
     Object? points = null,
@@ -117,7 +114,7 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
       difficulty: null == difficulty
           ? _value.difficulty
           : difficulty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as Difficulty,
       owner: null == owner
           ? _value.owner
           : owner // ignore: cast_nullable_to_non_nullable
@@ -146,10 +143,6 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
           ? _value.state
           : state // ignore: cast_nullable_to_non_nullable
               as String,
-      stateSince: null == stateSince
-          ? _value.stateSince
-          : stateSince // ignore: cast_nullable_to_non_nullable
-              as double,
       currentQuestionIndex: null == currentQuestionIndex
           ? _value.currentQuestionIndex
           : currentQuestionIndex // ignore: cast_nullable_to_non_nullable
@@ -187,7 +180,7 @@ abstract class _$$GameImplCopyWith<$Res> implements $GameCopyWith<$Res> {
       {int code,
       int count,
       String theme,
-      String difficulty,
+      Difficulty difficulty,
       Player owner,
       bool generating,
       bool started,
@@ -195,7 +188,6 @@ abstract class _$$GameImplCopyWith<$Res> implements $GameCopyWith<$Res> {
       List<Player> players,
       List<Question> questions,
       String state,
-      double stateSince,
       int currentQuestionIndex,
       int countdown,
       Map<String, double> points});
@@ -227,7 +219,6 @@ class __$$GameImplCopyWithImpl<$Res>
     Object? players = null,
     Object? questions = null,
     Object? state = null,
-    Object? stateSince = null,
     Object? currentQuestionIndex = null,
     Object? countdown = null,
     Object? points = null,
@@ -248,7 +239,7 @@ class __$$GameImplCopyWithImpl<$Res>
       difficulty: null == difficulty
           ? _value.difficulty
           : difficulty // ignore: cast_nullable_to_non_nullable
-              as String,
+              as Difficulty,
       owner: null == owner
           ? _value.owner
           : owner // ignore: cast_nullable_to_non_nullable
@@ -277,10 +268,6 @@ class __$$GameImplCopyWithImpl<$Res>
           ? _value.state
           : state // ignore: cast_nullable_to_non_nullable
               as String,
-      stateSince: null == stateSince
-          ? _value.stateSince
-          : stateSince // ignore: cast_nullable_to_non_nullable
-              as double,
       currentQuestionIndex: null == currentQuestionIndex
           ? _value.currentQuestionIndex
           : currentQuestionIndex // ignore: cast_nullable_to_non_nullable
@@ -312,7 +299,6 @@ class _$GameImpl implements _Game {
       required final List<Player> players,
       required final List<Question> questions,
       required this.state,
-      required this.stateSince,
       required this.currentQuestionIndex,
       required this.countdown,
       required final Map<String, double> points})
@@ -330,7 +316,7 @@ class _$GameImpl implements _Game {
   @override
   final String theme;
   @override
-  final String difficulty;
+  final Difficulty difficulty;
   @override
   final Player owner;
   @override
@@ -358,8 +344,6 @@ class _$GameImpl implements _Game {
   @override
   final String state;
   @override
-  final double stateSince;
-  @override
   final int currentQuestionIndex;
   @override
   final int countdown;
@@ -373,7 +357,7 @@ class _$GameImpl implements _Game {
 
   @override
   String toString() {
-    return 'Game(code: $code, count: $count, theme: $theme, difficulty: $difficulty, owner: $owner, generating: $generating, started: $started, finished: $finished, players: $players, questions: $questions, state: $state, stateSince: $stateSince, currentQuestionIndex: $currentQuestionIndex, countdown: $countdown, points: $points)';
+    return 'Game(code: $code, count: $count, theme: $theme, difficulty: $difficulty, owner: $owner, generating: $generating, started: $started, finished: $finished, players: $players, questions: $questions, state: $state, currentQuestionIndex: $currentQuestionIndex, countdown: $countdown, points: $points)';
   }
 
   @override
@@ -396,8 +380,6 @@ class _$GameImpl implements _Game {
             const DeepCollectionEquality()
                 .equals(other._questions, _questions) &&
             (identical(other.state, state) || other.state == state) &&
-            (identical(other.stateSince, stateSince) ||
-                other.stateSince == stateSince) &&
             (identical(other.currentQuestionIndex, currentQuestionIndex) ||
                 other.currentQuestionIndex == currentQuestionIndex) &&
             (identical(other.countdown, countdown) ||
@@ -420,7 +402,6 @@ class _$GameImpl implements _Game {
       const DeepCollectionEquality().hash(_players),
       const DeepCollectionEquality().hash(_questions),
       state,
-      stateSince,
       currentQuestionIndex,
       countdown,
       const DeepCollectionEquality().hash(_points));
@@ -446,7 +427,7 @@ abstract class _Game implements Game {
       {required final int code,
       required final int count,
       required final String theme,
-      required final String difficulty,
+      required final Difficulty difficulty,
       required final Player owner,
       required final bool generating,
       required final bool started,
@@ -454,7 +435,6 @@ abstract class _Game implements Game {
       required final List<Player> players,
       required final List<Question> questions,
       required final String state,
-      required final double stateSince,
       required final int currentQuestionIndex,
       required final int countdown,
       required final Map<String, double> points}) = _$GameImpl;
@@ -468,7 +448,7 @@ abstract class _Game implements Game {
   @override
   String get theme;
   @override
-  String get difficulty;
+  Difficulty get difficulty;
   @override
   Player get owner;
   @override
@@ -483,8 +463,6 @@ abstract class _Game implements Game {
   List<Question> get questions;
   @override
   String get state;
-  @override
-  double get stateSince;
   @override
   int get currentQuestionIndex;
   @override

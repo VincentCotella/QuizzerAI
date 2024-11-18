@@ -20,7 +20,7 @@ class _GeneratingStageState extends State<GeneratingStage> with SingleTickerProv
 
     // Initialize the AnimationController
     _controller = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
       vsync: this, // Using `vsync` here to prevent offscreen animations
     )..repeat(reverse: true);
 
@@ -40,18 +40,18 @@ class _GeneratingStageState extends State<GeneratingStage> with SingleTickerProv
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: FadeTransition(
-          opacity: _animation,
-          child: Text(
-            "Génération des questions en cours...",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+  Widget build(BuildContext context) => Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+          Text('Code : ${widget.game.code}', style: const TextStyle(fontSize: 30)),
+          const SizedBox(height: 30),
+          FadeTransition(
+            opacity: _animation,
+            child: const Text(
+              "Génération des questions en cours...",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
           ),
-        ),
-      ),
-    );
-  }
+        ]);
 }

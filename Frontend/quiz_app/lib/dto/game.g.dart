@@ -10,7 +10,7 @@ _$GameImpl _$$GameImplFromJson(Map<String, dynamic> json) => _$GameImpl(
       code: (json['code'] as num).toInt(),
       count: (json['count'] as num).toInt(),
       theme: json['theme'] as String,
-      difficulty: json['difficulty'] as String,
+      difficulty: $enumDecode(_$DifficultyEnumMap, json['difficulty']),
       owner: Player.fromJson(json['owner'] as Map<String, dynamic>),
       generating: json['generating'] as bool,
       started: json['started'] as bool,
@@ -22,7 +22,6 @@ _$GameImpl _$$GameImplFromJson(Map<String, dynamic> json) => _$GameImpl(
           .map((e) => Question.fromJson(e as Map<String, dynamic>))
           .toList(),
       state: json['state'] as String,
-      stateSince: (json['stateSince'] as num).toDouble(),
       currentQuestionIndex: (json['currentQuestionIndex'] as num).toInt(),
       countdown: (json['countdown'] as num).toInt(),
       points: (json['points'] as Map<String, dynamic>).map(
@@ -35,7 +34,7 @@ Map<String, dynamic> _$$GameImplToJson(_$GameImpl instance) =>
       'code': instance.code,
       'count': instance.count,
       'theme': instance.theme,
-      'difficulty': instance.difficulty,
+      'difficulty': _$DifficultyEnumMap[instance.difficulty]!,
       'owner': instance.owner,
       'generating': instance.generating,
       'started': instance.started,
@@ -43,8 +42,15 @@ Map<String, dynamic> _$$GameImplToJson(_$GameImpl instance) =>
       'players': instance.players,
       'questions': instance.questions,
       'state': instance.state,
-      'stateSince': instance.stateSince,
       'currentQuestionIndex': instance.currentQuestionIndex,
       'countdown': instance.countdown,
       'points': instance.points,
     };
+
+const _$DifficultyEnumMap = {
+  Difficulty.BEGINNER: 'BEGINNER',
+  Difficulty.EASY: 'EASY',
+  Difficulty.INTERMEDIATE: 'INTERMEDIATE',
+  Difficulty.HARD: 'HARD',
+  Difficulty.ADVANCED: 'ADVANCED',
+};

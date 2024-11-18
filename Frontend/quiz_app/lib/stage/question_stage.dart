@@ -5,11 +5,7 @@ class QuestionStage extends AbstractStage {
   const QuestionStage(super.game, {super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Question")),
-      body: Center(
-        child: AnimatedSwitcher(
+  Widget build(BuildContext context) => AnimatedSwitcher(
           duration: const Duration(seconds: 1),
           transitionBuilder: (Widget child, Animation<double> animation) {
             return ScaleTransition(scale: animation, child: child);
@@ -20,13 +16,10 @@ class QuestionStage extends AbstractStage {
             children: [
               Text(
                 game.questions[game.currentQuestionIndex].question,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               // Code d'affichage des options de réponse ici
             ],
           ),
-        ),
-      ),
-    );
-  }
+        );
 }

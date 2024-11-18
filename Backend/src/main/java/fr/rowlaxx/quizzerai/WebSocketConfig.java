@@ -2,6 +2,10 @@ package fr.rowlaxx.quizzerai;
 
 import fr.rowlaxx.quizzerai.game.GameNotifier;
 import lombok.AllArgsConstructor;
+import org.apache.catalina.connector.Connector;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -15,8 +19,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(notifier, "/game/live");
+        registry.addHandler(notifier, "/game/live").setAllowedOrigins("*");
     }
-
-
 }

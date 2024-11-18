@@ -50,7 +50,7 @@ public class GameplayService {
 
         if (state == GameState.STARTING) {
             state = GameState.QUESTION;
-            countdown = 3;
+            countdown = 5;
         }
         else if (state == GameState.QUESTION) {
             state = GameState.ANSWERS;
@@ -67,6 +67,7 @@ public class GameplayService {
                 game.setFinished(true);
             }
             else {
+                game.setCurrentQuestionIndex(currentQuestion + 1);
                 state = GameState.QUESTION;
                 countdown = 3;
             }
@@ -75,6 +76,10 @@ public class GameplayService {
         game.setState(state);
         game.setCountdown(countdown);
         notifier.notifyAllListener(game);
+
+        if (game.isFinished()) {
+            notifier.closeAllListener(game.getCode());
+        }
     }
 
     public void answer(Player player, int choice) {
@@ -96,7 +101,7 @@ public class GameplayService {
             throw new IllegalStateException("You already answered");
         }
 
-        var duration = Duration.between(Instant.now(), game.getStateSince());
+        var duration = Duration.between(game.getStateSince(), Instant.now()).abs();
         var answer = new Answer();
 
         answer.setDuration(duration);
@@ -108,6 +113,11 @@ public class GameplayService {
 
         answer.setPoint((int)(point * question.getMultiplicator()));
         answers.put(uuid, answer);
+
+        if (answers.size() == game.getPlayers().size()) {
+            game.setCountdown(0);
+        }
+
         notifier.notifyAllListener(game);
     }
 }

@@ -1,12 +1,15 @@
 // lib/screens/join_game_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:quiz_app/dto/player.dart';
 
 import 'package:quiz_app/service/http_service.dart' as http_service;
 import 'package:quiz_app/service/navigation_service.dart';
 
 class JoinGameScreen extends StatefulWidget {
-  const JoinGameScreen({super.key});
+  final Player player;
+
+  const JoinGameScreen(this.player, {super.key});
 
   @override
   State<JoinGameScreen> createState() => _JoinGameScreenState();
@@ -17,7 +20,7 @@ class _JoinGameScreenState extends State<JoinGameScreen> {
 
   void _joinGame() {
     http_service.joinGame(int.parse(_gameCode))
-      .then((game) => goToGame(context, game))
+      .then((game) => goToGame(context, game, widget.player))
       .catchError((error) => showDialog(
           context: context, 
           builder: (context) => const Text('Unable to join the game') 

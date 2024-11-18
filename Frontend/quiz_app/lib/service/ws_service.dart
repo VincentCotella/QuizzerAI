@@ -1,22 +1,23 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:web_socket_client/web_socket_client.dart';
+import 'package:quiz_app/service/http_service.dart';
 
 import 'package:quiz_app/dto/game.dart';
 
-const String baseUrl = "127.0.0.1:8544";
+WebSocket listenGame(int gameCode, void Function(Game) callback) {
+  const wsUrl = 'wss://$baseUrl/game/live';
 
-Future<WebSocket> listenGame(int gameCode, void Function(Game) callback) {
-  const wsUrl = 'ws://$baseUrl/game/live';
+  var socket = WebSocket(Uri.parse(wsUrl));
 
-  var future = WebSocket.connect(wsUrl, headers: {
-    'X-GameCode': gameCode
+  socket.messages.listen((msg) {
+    callback(Game.fromJson(jsonDecode(msg)));
   });
 
-  future.then((socket) {
-    socket.listen((event) {
-      callback(Game.fromJson(jsonDecode(event)));
-    });
+  socket.connection.listen((event) {
+    if (event is Connected) {
+      socket.send(gameCode.toString());
+    }
   });
-  
-  return future;
+
+  return socket;
 }
