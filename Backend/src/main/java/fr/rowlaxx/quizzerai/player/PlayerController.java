@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/player")
-@CrossOrigin
+@CrossOrigin(allowCredentials = "true", originPatterns = "*", allowedHeaders = "*")
 public class PlayerController {
 
     @PostMapping("/name")
