@@ -6,9 +6,9 @@ import 'package:quiz_app/dto/game.dart';
 import 'package:quiz_app/dto/player.dart';
 import 'package:http/http.dart' as http;
 
-//const String baseUrl = "projet1-441715.appspot.com";
-const String baseUrl = "127.0.0.1:8543";
-
+//const String baseUrl = "quizzerai-114409294332.us-central1.run.app";
+const String baseUrl = "quizzerai-114409294332.us-central1.run.app";
+// 127.0.0.1:8543
 
 Future<Player> fetchPlayer() {
   return http.get(Uri.parse("https://$baseUrl/player"))
