@@ -16,30 +16,37 @@ Quizzer AI is a quiz game that allows you to be challenge on every subject you w
 
 ## Installation
 
-### 1. Cloner le Dépôt
+### 1. Clone the Repository  
+Open your terminal and run the following command to clone the repository:  
 
-Ouvrez votre terminal et exécutez la commande suivante pour cloner le dépôt :
+```bash
+git clone https://github.com/your-username/your-project.git
+```  
 
-git clone https://github.com/votre-utilisateur/votre-projet.git
+Replace `your-username` and `your-project` with the appropriate username and repository name.  
 
-Remplacez votre-utilisateur et votre-projet par le nom d'utilisateur et le nom du dépôt appropriés.
+### 2. Navigate to the Project Directory  
 
-###2. Naviguer dans le Répertoire du Projet
+```bash
+cd your-project
+```  
 
-cd votre-projet
+### 3. Install Dependencies  
+Ensure that Flutter is properly installed by verifying it with:  
 
-###3. Installer les Dépendances
-
-Assurez-vous que Flutter est correctement installé en vérifiant avec :
-
+```bash
 flutter doctor
+```  
 
-Ensuite, installez les dépendances du projet :
+Then, install the project dependencies:  
 
+```bash
 flutter pub get
+```  
 
-Lancer l'Application
+### 4. Launch the Application  
+To run the Flutter application in web mode with specific browser flags, use the following command:  
 
-Pour exécuter l'application Flutter en mode web avec des paramètres spécifiques du navigateur, utilisez la commande suivante :
-
-flutter run -d chrome --web-browser-flag="--disable-web-security" --web-browser-flag="--user-data-dir=/tm
+```bash
+flutter run -d chrome --web-browser-flag="--disable-web-security" --web-browser-flag="--user-data-dir=/tmp"
+```  
