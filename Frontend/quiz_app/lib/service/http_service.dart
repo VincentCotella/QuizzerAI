@@ -4,51 +4,40 @@ import 'dart:convert';
 import 'package:quiz_app/dto/difficulty.dart';
 import 'package:quiz_app/dto/game.dart';
 import 'package:quiz_app/dto/player.dart';
-import 'package:http/http.dart' as http;
+import 'dart:html' as html;
 
-//const String baseUrl = "quizzerai-114409294332.us-central1.run.app"; /api
-const String baseUrl = "deploy-frontflutter-114409294332.us-central1.run.app/api";
-// 127.0.0.1:8543
+const String baseUrl = "quizzerai-114409294332.us-central1.run.app";
 
-Future<Player> fetchPlayer() {
-  return http.get(Uri.parse("https://$baseUrl/player"))
-      .then((resp) => jsonDecode(resp.body))
-      .then((json) => Player.fromJson(json));
+Future<dynamic> execute(String method, String uri, {bool decode = true}) {
+  var request = html.HttpRequest();
+  request.withCredentials = true; 
+  request.open(method, 'https://$baseUrl$uri');
+  request.send();
+
+  if (!decode) {
+    return request.onLoadEnd.first;
+  }
+
+  return request.onLoadEnd.first.then((_) => jsonDecode(request.responseText!));
 }
 
-Future<Game> fetchGame() {
-  return http.get(Uri.parse("https://$baseUrl/game"))
-      .then((resp) => jsonDecode(resp.body))
-      .then((json) => Game.fromJson(json));
-}
+Future<Player> fetchPlayer() => execute('GET', '/player')
+    .then((j) => Player.fromJson(j));
 
-Future<Player> changeName(String newName) {
-  return http.post(Uri.parse("https://$baseUrl/player/name?value=$newName"))
-      .then((resp) => jsonDecode(resp.body))
-      .then((json) => Player.fromJson(json));
-}
+Future<Game> fetchGame() => execute('GET', '/game')
+    .then((j) => Game.fromJson(j));
 
-void answer(int choice) {
-  http.post(Uri.parse("https://$baseUrl/game/answer?choice=$choice"));
-}
+Future<Player> changeName(String newName) => execute('POST', '/player/name?value=$newName')
+    .then((j) => Player.fromJson(j));
 
-void startGame() {
-  http.post(Uri.parse("https://$baseUrl/game/start"));
-}
+void answer(int choice) => execute('POST', '/game/answer?choice=$choice', decode: false);
 
-void leaveGame() {
-  http.delete(Uri.parse("https://$baseUrl/game"));
-}
+void startGame() => execute('POST', '/game/start', decode: false);
 
-Future<Game> joinGame(int gameCode) {
-  return http.post(Uri.parse("https://$baseUrl/game/join?code=$gameCode"))
-      .then((resp) => jsonDecode(resp.body))
-      .then((json) => Game.fromJson(json));
-}
+void leaveGame() => execute('DELETE', '/game', decode: false);
 
-Future<Game> createGame(Difficulty difficulty, String theme, int count) {
-  return http.post(Uri.parse("https://$baseUrl/game?difficulty=${difficulty.name}&theme=$theme&count=$count"))
-      .then((resp) => jsonDecode(resp.body))
-      .then((json) => Game.fromJson(json));
-      
-}
+Future<Game> joinGame(int gameCode) => execute('POST', '/game/join?code=$gameCode')
+    .then((j) => Game.fromJson(j));
+
+Future<Game> createGame(Difficulty difficulty, String theme, int count) => execute('POST', '/game?difficulty=${difficulty.name}&theme=$theme&count=$count')
+    .then((j) => Game.fromJson(j));
