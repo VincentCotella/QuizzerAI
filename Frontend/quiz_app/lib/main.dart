@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/dto/game.dart';
+import 'package:quiz_app/dto/player.dart';
 import 'package:quiz_app/screens/quiz_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/create_game_screen.dart';
 import 'screens/join_game_screen.dart';
-import 'stage/results_stage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -46,10 +46,33 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const HomeScreen(),
-        '/create_game': (context) => const CreateGameScreen(),
-        '/join_game': (context) => const JoinGameScreen(),
-        '/game': (context) => QuizScreen(ModalRoute.settingsOf(context)!.arguments as Game),
-        '/results': (context) => ResultsScreen(),
+        '/create_game': (context) {
+          var arg = ModalRoute.settingsOf(context)?.arguments as Player?;
+
+          if (arg == null) {
+            return const HomeScreen();
+          }
+
+          return CreateGameScreen(ModalRoute.settingsOf(context)!.arguments as Player);
+        },
+        '/join_game': (context) {
+          var arg = ModalRoute.settingsOf(context)?.arguments as Player?;
+
+          if (arg == null) {
+            return const HomeScreen();
+          }
+
+          return JoinGameScreen(arg);
+        },
+        '/game': (context) {
+          List<dynamic>? args = ModalRoute.settingsOf(context)?.arguments as List<dynamic>?;
+
+          if (args == null) {
+            return const HomeScreen();
+          }
+
+          return QuizScreen(args[0] as Game, args[1] as Player);
+        }
       },
       debugShowCheckedModeBanner: false,
     );

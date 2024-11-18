@@ -20,7 +20,7 @@ class _StartingStageState extends State<StartingStage> with SingleTickerProvider
 
     // Initialize the AnimationController
     _controller = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
       vsync: this, // `vsync` is provided by SingleTickerProviderStateMixin
     )..repeat(reverse: true);
 
@@ -40,19 +40,11 @@ class _StartingStageState extends State<StartingStage> with SingleTickerProvider
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Début du jeu")),
-      body: Center(
-        child: ScaleTransition(
-          scale: _animation,
-          child: Text(
-            "Le jeu commence!",
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => ScaleTransition(
+    scale: _animation,
+    child: Text("Le jeu commence dans ${widget.game.countdown}s !",
+      style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+      textAlign: TextAlign.center,
+    ),
+  );
 }

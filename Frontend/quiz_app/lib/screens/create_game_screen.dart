@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:quiz_app/dto/difficulty.dart';
+import 'package:quiz_app/dto/player.dart';
 
 import 'package:quiz_app/service/http_service.dart' as http_service;
 import 'package:quiz_app/service/navigation_service.dart';
@@ -14,7 +15,9 @@ class ThemeOption {
 }
 
 class CreateGameScreen extends StatefulWidget {
-  const CreateGameScreen({super.key});
+  final Player player;
+
+  const CreateGameScreen(this.player, {super.key});
 
   @override
   State<CreateGameScreen> createState() => _CreateGameScreenState();
@@ -53,7 +56,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
     int numberOfQuestions = _selectedNumberOfQuestions!;
     
     http_service.createGame(difficulty, theme, numberOfQuestions)
-      .then((game) => goToGame(context, game))
+      .then((game) => goToGame(context, game, widget.player))
       .catchError((error, stack) => showDialog(
         context: context, 
         builder: (context) => Text("Unable to create a game : ${error.toString()}"),
